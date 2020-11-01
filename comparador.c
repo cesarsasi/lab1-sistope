@@ -23,7 +23,6 @@ int main(int argc, char** argv){
 
      //puntero de fichero
     archivo = fopen("secuencia.txt", "r");
-
     guardarLineas(archivo, cadena,primeraLinea, cantidadLineas, pid);
     fclose(archivo);
 }
@@ -31,6 +30,7 @@ int main(int argc, char** argv){
 //Buscar Secuencia del tipo XXXX en una lista
 //Casos borde: (fin)largo-3 || (linea menor a secuencia)largo < 4
 void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador){
+    //Almacenar 
     int largo;
     largo = leerLargoLinea();
     printf("\n largo linea %d \n",largo);
@@ -40,11 +40,34 @@ void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLin
             fscanf(archivo, "%c", &matrizArchivo[i][j]);
         }
     }
+
+    //Prueba print matriz
     for(int i =0 ; i < cantidadLineas; i++){
         for(int j=0 ; j < largo+1; j++){
             printf("%c", matrizArchivo[i][j]);
         }
         printf("\n");
+    }
+
+    //
+    int i=0;
+    int j=0;
+    int match = 0;
+    while(i != cantidadLineas){
+        
+        while(j != largo-4){
+            if(cadena[0]==matrizArchivo[i][j] && cadena[1]==matrizArchivo[i][j+1] && cadena[2]==matrizArchivo[i][j+2] && cadena[3]==matrizArchivo[i][j+3]){
+                match++;
+            }
+            j++;
+        }
+        if(match != 0){
+            printf("\n Match fila %d", i+1);
+        }else{
+            printf("\n No Match fila %d", i+1);
+        }
+        match = 0;
+    i++;
     }
 }
 
