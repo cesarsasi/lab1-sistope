@@ -54,7 +54,6 @@ void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLin
     int j=0;
     int match = 0;
     while(i != cantidadLineas){
-        
         while(j != largo-4){
             if(cadena[0]==matrizArchivo[i][j] && cadena[1]==matrizArchivo[i][j+1] && cadena[2]==matrizArchivo[i][j+2] && cadena[3]==matrizArchivo[i][j+3]){
                 match++;
@@ -67,6 +66,7 @@ void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLin
             printf("\n No Match fila %d", i+1);
         }
         match = 0;
+        j = 0;
     i++;
     }
 }
