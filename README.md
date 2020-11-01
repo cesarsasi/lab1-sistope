@@ -1,1 +1,1 @@
-# lab1-sistope
+Primer entregable (fork-pipes) de los laboratorios de la asignatura Sistemas Operativos 
