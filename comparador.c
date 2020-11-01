@@ -11,16 +11,14 @@
 //Funciones
 void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador);
 int leerLargoLinea();
-
 FILE *archivo;
 FILE *fichero2;
 //Main programa comparador 
 int main(int argc, char** argv){
-    int pid = 0;
+    int pid = 1805;
     int cantidadLineas= 4;
     int primeraLinea = 0;
     char cadena[] = "AAAA";
-
      //puntero de fichero
     archivo = fopen("secuencia.txt", "r");
     guardarLineas(archivo, cadena,primeraLinea, cantidadLineas, pid);
@@ -30,6 +28,17 @@ int main(int argc, char** argv){
 //Buscar Secuencia del tipo XXXX en una lista
 //Casos borde: (fin)largo-3 || (linea menor a secuencia)largo < 4
 void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador){
+    //NOMbre
+    char rp[100]="rp_";
+    strcat(rp,cadena);
+    char pid[100];
+    sprintf(pid,"%d",identificador);
+    strcat(rp,pid);
+    //Se crea
+    FILE *salida;
+    salida=fopen(rp,"w");
+    fclose(salida);
+
     //Almacenar 
     int largo;
     largo = leerLargoLinea();
@@ -62,8 +71,34 @@ void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLin
         }
         if(match != 0){
             printf("\n Match fila %d", i+1);
+
+            FILE *salida;
+
+            salida= fopen(rp,"a");
+            for(int k =i ; k <= i; k++){
+                for(int m=0 ; m < largo; m++){
+                    fprintf(salida,"%c", matrizArchivo[k][m]);
+                }
+                fprintf(salida, "  ");
+                fprintf(salida, "SI\n");
+                
+            }
+            fclose(salida);
+
         }else{
             printf("\n No Match fila %d", i+1);
+
+            FILE *salida;
+            salida= fopen(rp,"a");
+            for(int k =i ; k <= i; k++){
+                for(int m=0 ; m < largo; m++){
+                    fprintf(salida,"%c", matrizArchivo[k][m]);
+                }
+                fprintf(salida, "  ");
+                fprintf(salida, "NO\n");
+                
+            }
+            fclose(salida);
         }
         match = 0;
         j = 0;
