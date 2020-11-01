@@ -10,15 +10,18 @@
 
 //Funciones
 void programaComparador(FILE * archivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador);
+int leerLargoLinea();
 
 //Main programa comparador 
 int main(int argc, char** argv){
     int pid = 0;
-    int cantidadLineas= 0;
+    int cantidadLineas= 4;
     int primeraLinea = 0;
     char cadena[] = "AAAA";
+
     FILE *fichero;       //puntero de fichero
     fichero = fopen("secuencia.txt", "r");
+
     programaComparador(fichero, cadena,primeraLinea, cantidadLineas, pid);
     fclose(fichero);
 }
@@ -26,28 +29,52 @@ int main(int argc, char** argv){
 //Buscar Secuencia del tipo XXXX en una lista
 //Casos borde: (fin)largo-3 || (linea menor a secuencia)largo < 4
 void programaComparador(FILE * archivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador){
-    char linea[1024]; //almacenamiento previcional de la linea leida
+    int contLineasAlmac = 0;
     //Lee línea a línea (j es utilizado para leer el largo en la primera iteracion)
-    int largo = 0; 
-    while(fgets(linea, 1024, (FILE*) archivo) != NULL) {
+    int largoLineas = leerLargoLinea(); 
+    char linea[largoLineas];
+    char * lineasAlmacenadas[5]; 
+    int contLineas = 0;
+    
+    while(fgets(linea, largoLineas, (FILE*) archivo) != NULL) {
         //Prueba ordenar cadena
-        printf("--Linea--\n %s--Fin de la linea--\n", linea);
+        //printf("--Linea--\n %s--Fin de la linea--\n", linea);
 
-        //Obtencion del largo con la primera fila 
-        int i=0;
-        if (largo == 0){
-            while (linea[i] != '\n'){
-                largo= largo+1;
-                i=i+1;
-            }
-            printf("Largo++++++++++++++++++++++++++++++++++++ %d",largo);
+        //Almacenamiento definitivo de las lineas (condición limite de largos) *****IMPORTANTE: PROGRAMA COORDINADOR TOMA LA PRIMERA LINEA COMO 0
+        if(contLineas >= primeraLinea && contLineas < primeraLinea + cantidadLineas){
+            lineasAlmacenadas[contLineasAlmac] = linea;
+            contLineasAlmac++;
+        }     // 0-4       primeralinea 0 --- cantidadlineas 5 ------   4< 0+5 
+
+        //Prueba Almac
+        for (int contPrueba = 0; contPrueba < cantidadLineas; contPrueba++){
+             printf("--Linea--\n %s--Fin de la linea--\n", lineasAlmacenadas[contPrueba]);
         }
+        
 
-        //Almacenamiento definitivo de las lineas
 
+        //
 
+        contLineas++;
     }
-
     //Prueba pasar cadena 
     printf("%s\n", cadena );
+}
+
+int leerLargoLinea(){
+    FILE *fichero;       //puntero de fichero
+    fichero = fopen("secuencia.txt", "r");
+    //Obtencion del largo con la primera fila 
+    int largoLineas;
+    int i=0;
+    char linea[1024];
+    fgets(linea, 1024, (FILE*) fichero);
+    if (largoLineas == 0){
+        while (linea[i] != '\n'){
+            largoLineas= largoLineas+1;
+            i=i+1;
+        }
+    }
+    fclose(fichero);
+    return largoLineas;
 }
