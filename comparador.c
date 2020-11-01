@@ -9,7 +9,7 @@
 #include <string.h>
 
 //Funciones
-void programaComparador(FILE * archivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador);
+void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador);
 int leerLargoLinea();
 
 FILE *archivo;
@@ -24,13 +24,13 @@ int main(int argc, char** argv){
      //puntero de fichero
     archivo = fopen("secuencia.txt", "r");
 
-    programaComparador(archivo, cadena,primeraLinea, cantidadLineas, pid);
+    guardarLineas(archivo, cadena,primeraLinea, cantidadLineas, pid);
     fclose(archivo);
 }
 
 //Buscar Secuencia del tipo XXXX en una lista
 //Casos borde: (fin)largo-3 || (linea menor a secuencia)largo < 4
-void programaComparador(FILE * archivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador){
+void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador){
     int largo;
     largo = leerLargoLinea();
     printf("\n largo linea %d \n",largo);
