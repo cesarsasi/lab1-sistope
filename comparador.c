@@ -32,11 +32,12 @@ void programaComparador(FILE * archivo,char cadena[],int primeraLinea,int cantid
     int contLineasAlmac = 0;
     //Lee línea a línea (j es utilizado para leer el largo en la primera iteracion)
     int largoLineas = leerLargoLinea(); 
+    printf("\n Largo = %d \n",largoLineas);
     char linea[largoLineas];
     char * lineasAlmacenadas[5]; 
     int contLineas = 0;
     
-    while(fgets(linea, largoLineas, (FILE*) archivo) != NULL) {
+    while(fgets(linea, largoLineas+1, (FILE*) archivo) != NULL) {
         //Prueba ordenar cadena
         //printf("--Linea--\n %s--Fin de la linea--\n", linea);
 
@@ -45,18 +46,15 @@ void programaComparador(FILE * archivo,char cadena[],int primeraLinea,int cantid
             lineasAlmacenadas[contLineasAlmac] = linea;
             contLineasAlmac++;
         }     // 0-4       primeralinea 0 --- cantidadlineas 5 ------   4< 0+5 
-
-        //Prueba Almac
-        for (int contPrueba = 0; contPrueba < cantidadLineas; contPrueba++){
-             printf("--Linea--\n %s--Fin de la linea--\n", lineasAlmacenadas[contPrueba]);
-        }
-        
-
-
         //
 
         contLineas++;
     }
+    //Prueba Almac
+    for (int contPrueba = 0; contPrueba < cantidadLineas; contPrueba++){
+             printf("--Linea--\n %s--Fin de la linea--\n", lineasAlmacenadas[contPrueba]);
+        }
+
     //Prueba pasar cadena 
     printf("%s\n", cadena );
 }
