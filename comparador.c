@@ -78,9 +78,7 @@ void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLin
         }
         if(match != 0){
             printf("\n Match fila %d", i+1);
-
             FILE *salida;
-
             salida= fopen(rp,"a");
             for(int k =i ; k <= i; k++){
                 for(int m=0 ; m < largo; m++){
@@ -88,10 +86,8 @@ void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLin
                 }
                 fprintf(salida, "  ");
                 fprintf(salida, "SI\n");
-                
             }
             fclose(salida);
-
         }else{
             printf("\n No Match fila %d", i+1);
 
@@ -102,8 +98,7 @@ void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLin
                     fprintf(salida,"%c", matrizArchivo[k][m]);
                 }
                 fprintf(salida, "  ");
-                fprintf(salida, "NO\n");
-                
+                fprintf(salida, "NO\n");               
             }
             fclose(salida);
         }
