@@ -17,13 +17,7 @@ void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLin
 int leerLargoLinea();
 FILE *archivo;
 FILE *fichero2;
-typedef struct instrucciones instrucciones;
-struct instrucciones{
-    char* archivoEntrada;
-    int lineaInicia;
-    char *cadenaBuscar;
-    int lineasporProcesos;
-};
+
 //Main programa comparador 
 int main(int argc, char** argv){
 
@@ -31,12 +25,12 @@ int main(int argc, char** argv){
     int cantidadLineas;
     int primeraLinea;
     char cadena[4];
-    instrucciones instruccionesRec;
-    read(STDIN_FILENO,instruccionesRec,sizeof(instrucciones));
-    printf("\nNOmbre archivo %s\n",instruccionesRec.archivoEntrada);
+    char * instruccionesREC[4];
+    read(STDIN_FILENO,instruccionesREC,sizeof(instruccionesREC));
+    printf("\nNOmbre archivo %s\n",instruccionesREC[0]);
     
      //puntero de fichero
-    archivo = fopen(instruccionesRec.archivoEntrada, "r");
+    archivo = fopen(instruccionesREC[0], "r");
     guardarLineas(archivo, cadena,primeraLinea, cantidadLineas, pid);
     fclose(archivo);
 }

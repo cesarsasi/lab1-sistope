@@ -10,13 +10,6 @@
 #define ESCRITURA 1
 #define LECTURA 0
 //Funciones
-typedef struct instrucciones instrucciones;
-struct instrucciones{
-    char* archivoEntrada;
-    int lineaInicia;
-    char *cadenaBuscar;
-    int lineasporProcesos;
-};
 //Main programa coordinador
 int main(int argc, char** argv){
 	
@@ -90,6 +83,7 @@ int main(int argc, char** argv){
 		printf("Hay Banderita!");
 	}
 	pid_t pid;
+    int status;
 
 	//Programa coordinador                            Procesos no puede ser 0 !!!!!!!
     //Proceso Coordinador
@@ -100,11 +94,13 @@ int main(int argc, char** argv){
 		int lineaInicia = 0;
         for (int  i = 0; i < numeroProcesos; i++){
             //crear proceso hijo y dar (lineasporProceso) Lineas
-			instrucciones nuevaInstrucciones;
-            nuevaInstrucciones.archivoEntrada = archivoEntrada;
-            nuevaInstrucciones.lineaInicia= lineaInicia;
-            nuevaInstrucciones.cadenaBuscar= cadenaBuscar;
-            nuevaInstrucciones.lineasporProceso=lineasporProceso;
+            char nlineaInicia[100];
+            sprintf(nlineaInicia,"%d",lineaInicia);
+            char nlineasporProcesos[100];
+            sprintf(nlineasporProcesos,"%d",lineasporProcesos);
+
+			char * instrucciones[4] = {archivoEntrada,nlineaInicia,cadenaBuscar,nlineasporProcesos};
+            printf("\nNOmbre archivo++ %s\n",instrucciones[0]);
 			pid = fork();
 			
 			if (pid == 0){
@@ -118,7 +114,7 @@ int main(int argc, char** argv){
 			}else if(pid > 0){
 				//Soy tu padre!
                 close(pipes[LECTURA]);
-                write(pipes[ESCRITURA],nuevaInstrucciones,sizeof(instrucciones));
+                write(pipes[ESCRITURA],instrucciones,sizeof(instrucciones));
                 waitpid(pid, &status,0);
                 lineaInicia+= lineasporProcesos;
 
