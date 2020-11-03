@@ -75,18 +75,41 @@ int main(int argc, char** argv){
 	if (flag != 0){
 		printf("Hay Banderita!");
 	}
-	
+	int fd[2];
+	int pid;
 
 	//Programa coordinador                            Procesos no puede ser 0 !!!!!!!
-    /*
     //Proceso Coordinador
     //Calculo de lineas por proceso
     int lineasporProcesos = lineasArchivo/numeroProcesos;
     int diferenciaLineProce = lineasArchivo - lineasporProcesos*numeroProcesos;
     if(diferenciaLineProce == 0 ){//Las lineas se distribuyen equitativamente en cantidad divLineProce
+		int lineaInicia = 0;
         for (int  i = 0; i < numeroProcesos; i++){
             //crear proceso hijo y dar (lineasporProceso) Lineas
+			char * argumentos[] = {archivoEntrada,lineaInicia,cadenaBuscar,lineasporProcesos,pid,0};
+			pid = fork();
+			
+			if (pid == 0){
+				//Soy el hijo
+				execv("comparador.exe",argumentos);
+
+				lineaInicia+= lineasporProcesos;
+			}else if(pid > 0){
+				//Soy tu padre!
+
+			}else{
+				//Problemas
+				exit();
+			}
+			
+
         }
+
+
+		//wait procesos y juntar
+
+
         
     }else if(diferenciaLineProce < 0){//El ultimo proceso queda con menos lineas
         for (int i = 0; i < numeroProcesos -1; i++){
@@ -98,5 +121,7 @@ int main(int argc, char** argv){
             //crear proceso hijo y dar (lineasporProceso) Lineas
         }
         //crear proceso hijo y dar procesos restantes (diferenciaLineProce) Lineas
-    }*/
+    }
+
+
 }

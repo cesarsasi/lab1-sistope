@@ -15,10 +15,12 @@ FILE *archivo;
 FILE *fichero2;
 //Main programa comparador 
 int main(int argc, char** argv){
+
     int pid = 1805;
     int cantidadLineas= 4;
     int primeraLinea = 2;
     char cadena[] = "AAAA";
+    
      //puntero de fichero
     archivo = fopen("secuencia.txt", "r");
     guardarLineas(archivo, cadena,primeraLinea, cantidadLineas, pid);
