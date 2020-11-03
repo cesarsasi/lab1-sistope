@@ -3,9 +3,20 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/wait.h> //Define las constantes simbólicas para usar con waitpid(), wait() por ejemplo
+#include <sys/types.h> //define varios tipos de datos como pid_t
 
+
+#define ESCRITURA 1
+#define LECTURA 0
 //Funciones
-
+typedef struct instrucciones instrucciones;
+struct instrucciones{
+    char* archivoEntrada;
+    int lineaInicia;
+    char *cadenaBuscar;
+    int lineasporProcesos;
+};
 //Main programa coordinador
 int main(int argc, char** argv){
 	
@@ -15,6 +26,9 @@ int main(int argc, char** argv){
     int flag;
     char *mflag;
     int c;
+    char* ejecutableExec[2] = {"./comparador", NULL};
+    int *pipes = (int*)malloc(sizeof(int)*2);
+    pipe(pipes); //inicializa el pipe
 
     while (( (c = getopt(argc, argv, "i:n:c:p:d")) != -1)){
         switch (c)
@@ -75,8 +89,7 @@ int main(int argc, char** argv){
 	if (flag != 0){
 		printf("Hay Banderita!");
 	}
-	int fd[2];
-	int pid;
+	pid_t pid;
 
 	//Programa coordinador                            Procesos no puede ser 0 !!!!!!!
     //Proceso Coordinador
@@ -87,20 +100,33 @@ int main(int argc, char** argv){
 		int lineaInicia = 0;
         for (int  i = 0; i < numeroProcesos; i++){
             //crear proceso hijo y dar (lineasporProceso) Lineas
-			char * argumentos[] = {archivoEntrada,lineaInicia,cadenaBuscar,lineasporProcesos,pid,0};
+			instrucciones nuevaInstrucciones;
+            nuevaInstrucciones.archivoEntrada = archivoEntrada;
+            nuevaInstrucciones.lineaInicia= lineaInicia;
+            nuevaInstrucciones.cadenaBuscar= cadenaBuscar;
+            nuevaInstrucciones.lineasporProceso=lineasporProceso;
 			pid = fork();
 			
 			if (pid == 0){
 				//Soy el hijo
-				execv("comparador.exe",argumentos);
+                close(pipes[ESCRITURA]);
+                dup2(pipes[LECTURA],STDIN_FILENO);
+				execv(ejecutableExec[0],ejecutableExec);
+                exit(-1);
 
-				lineaInicia+= lineasporProcesos;
+
 			}else if(pid > 0){
 				//Soy tu padre!
+                close(pipes[LECTURA]);
+                write(pipes[ESCRITURA],nuevaInstrucciones,sizeof(instrucciones));
+                waitpid(pid, &status,0);
+                lineaInicia+= lineasporProcesos;
+
+
 
 			}else{
 				//Problemas
-				exit();
+				exit(-1);
 			}
 			
 

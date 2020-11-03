@@ -8,21 +8,35 @@
 #include <unistd.h>
 #include <string.h>
 
+#define LECTURA 0
+#define ESCRITURA 1
+
+
 //Funciones
 void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador);
 int leerLargoLinea();
 FILE *archivo;
 FILE *fichero2;
+typedef struct instrucciones instrucciones;
+struct instrucciones{
+    char* archivoEntrada;
+    int lineaInicia;
+    char *cadenaBuscar;
+    int lineasporProcesos;
+};
 //Main programa comparador 
 int main(int argc, char** argv){
 
-    int pid = 1805;
-    int cantidadLineas= 4;
-    int primeraLinea = 2;
-    char cadena[] = "AAAA";
+    int pid=1858;
+    int cantidadLineas;
+    int primeraLinea;
+    char cadena[4];
+    instrucciones instruccionesRec;
+    read(STDIN_FILENO,instruccionesRec,sizeof(instrucciones));
+    printf("\nNOmbre archivo %s\n",instruccionesRec.archivoEntrada);
     
      //puntero de fichero
-    archivo = fopen("secuencia.txt", "r");
+    archivo = fopen(instruccionesRec.archivoEntrada, "r");
     guardarLineas(archivo, cadena,primeraLinea, cantidadLineas, pid);
     fclose(archivo);
 }
