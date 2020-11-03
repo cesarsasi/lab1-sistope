@@ -17,7 +17,7 @@ FILE *fichero2;
 int main(int argc, char** argv){
     int pid = 1805;
     int cantidadLineas= 4;
-    int primeraLinea = 0;
+    int primeraLinea = 2;
     char cadena[] = "AAAA";
      //puntero de fichero
     archivo = fopen("secuencia.txt", "r");
@@ -44,6 +44,13 @@ void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLin
     largo = leerLargoLinea();
     printf("\n largo linea %d \n",largo);
     char matrizArchivo[cantidadLineas][largo+1];
+    //Cadena que almacenare momentaneamente las lineas que no correspondan a revisar
+    char lineasX[largo+1];
+    //Dejo el puntero hasta la linea que se desea comenzar a leer
+    for(int i=0; i<primeraLinea; i++){
+        fgets(lineasX,largo+1,archivo);
+    }
+    //Hago el almacenamiento de las lineas necesarias
     for(int i =0 ; i < cantidadLineas; i++){
         for(int j=0 ; j < largo+1; j++){
             fscanf(archivo, "%c", &matrizArchivo[i][j]);
