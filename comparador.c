@@ -7,43 +7,62 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 
 #define LECTURA 0
 #define ESCRITURA 1
 
 
 //Funciones
-void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador);
-int leerLargoLinea();
+void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador);
+int leerLargoLinea(char * archivo);
 FILE *archivo;
 FILE *fichero2;
 
 //Main programa comparador 
 int main(int argc, char** argv){
 
-    int pid=1858;
+    int pid=getpid();
     int cantidadLineas;
     int primeraLinea;
-    char cadena[4];
-    char * instruccionesREC[4];
-    read(STDIN_FILENO,instruccionesREC,sizeof(instruccionesREC));
-    printf("\nNOmbre archivo %s\n",instruccionesREC[0]);
-    
-     //puntero de fichero
-    archivo = fopen(instruccionesREC[0], "r");
-    guardarLineas(archivo, cadena,primeraLinea, cantidadLineas, pid);
+    char instruccionesREC[60];
+
+    read(STDIN_FILENO,instruccionesREC,60*sizeof(char));
+    //seprar variables
+    printf("%s\n", instruccionesREC);
+    char * instruccion = strtok(instruccionesREC,",");
+    char * archivoSTR = instruccion;
+    printf("---%s\n", archivoSTR);
+    instruccion = strtok(NULL,",");
+    char * primeralineaSTR = instruccion;
+    printf("---%s\n", primeralineaSTR);
+    primeraLinea = atoi(primeralineaSTR);
+    instruccion = strtok(NULL,",");
+    char * cadena = instruccion;
+    printf("---%s\n", cadena);
+    instruccion = strtok(NULL,",");
+    char * cantidadLineasSTR = instruccion;
+    printf("---%s\n", cantidadLineasSTR);
+    cantidadLineas = atoi(cantidadLineasSTR);
+
+    archivo = fopen(archivoSTR, "r");
+    guardarLineas(archivo, archivoSTR, cadena, primeraLinea, cantidadLineas, pid);
     fclose(archivo);
 }
 
 //Buscar Secuencia del tipo XXXX en una lista
 //Casos borde: (fin)largo-3 || (linea menor a secuencia)largo < 4
-void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador){
+void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador){
     //NOMbre
     char rp[100]="rp_";
     strcat(rp,cadena);
     char pid[100];
     sprintf(pid,"%d",identificador);
+    strcat(rp,"_");
     strcat(rp,pid);
+    strcat(rp,".txt");
+
     //Se crea
     FILE *salida;
     salida=fopen(rp,"w");
@@ -51,7 +70,7 @@ void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLin
 
     //Almacenar 
     int largo;
-    largo = leerLargoLinea();
+    largo = leerLargoLinea(nombreArchivo);
     printf("\n largo linea %d \n",largo);
     char matrizArchivo[cantidadLineas][largo+1];
     //Cadena que almacenare momentaneamente las lineas que no correspondan a revisar
@@ -118,8 +137,8 @@ void guardarLineas(FILE * archivo,char cadena[],int primeraLinea,int cantidadLin
     }
 }
 
-int leerLargoLinea(){
-    fichero2 = fopen("secuencia.txt", "r");
+int leerLargoLinea(char * archivo){
+    fichero2 = fopen(archivo, "r");
     //Obtencion del largo con la primera fila 
     int largoLineas=0;
     char caracter;

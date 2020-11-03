@@ -5,7 +5,7 @@
 #include <string.h>
 #include <sys/wait.h> //Define las constantes simbólicas para usar con waitpid(), wait() por ejemplo
 #include <sys/types.h> //define varios tipos de datos como pid_t
-
+#include <sys/stat.h>
 
 #define ESCRITURA 1
 #define LECTURA 0
@@ -19,7 +19,7 @@ int main(int argc, char** argv){
     int flag;
     char *mflag;
     int c;
-    char* ejecutableExec[2] = {"./comparador", NULL};
+    
     int *pipes = (int*)malloc(sizeof(int)*2);
     pipe(pipes); //inicializa el pipe
 
@@ -82,44 +82,58 @@ int main(int argc, char** argv){
 	if (flag != 0){
 		printf("Hay Banderita!");
 	}
+
+    int **arrPipes = (int**)malloc(sizeof(int *)*numeroProcesos);
+    for (int i = 0; i < numeroProcesos; i++){
+        arrPipes[i]= (int*)malloc(sizeof(int)*2);
+        pipe(arrPipes[i]);
+    }
+    
 	pid_t pid;
     int status;
+
+    char *pl[] = {"comparador", NULL};
 
 	//Programa coordinador                            Procesos no puede ser 0 !!!!!!!
     //Proceso Coordinador
     //Calculo de lineas por proceso
     int lineasporProcesos = lineasArchivo/numeroProcesos;
     int diferenciaLineProce = lineasArchivo - lineasporProcesos*numeroProcesos;
-    if(diferenciaLineProce == 0 ){//Las lineas se distribuyen equitativamente en cantidad divLineProce
+    //if(diferenciaLineProce == 0 ){//Las lineas se distribuyen equitativamente en cantidad divLineProce
 		int lineaInicia = 0;
         for (int  i = 0; i < numeroProcesos; i++){
             //crear proceso hijo y dar (lineasporProceso) Lineas
-            char nlineaInicia[100];
+
+            char nlineaInicia[100], nlineasporProcesos[100];
             sprintf(nlineaInicia,"%d",lineaInicia);
-            char nlineasporProcesos[100];
             sprintf(nlineasporProcesos,"%d",lineasporProcesos);
 
-			char * instrucciones[4] = {archivoEntrada,nlineaInicia,cadenaBuscar,nlineasporProcesos};
-            printf("\nNOmbre archivo++ %s\n",instrucciones[0]);
-			pid = fork();
-			
-			if (pid == 0){
-				//Soy el hijo
-                close(pipes[ESCRITURA]);
-                dup2(pipes[LECTURA],STDIN_FILENO);
-				execv(ejecutableExec[0],ejecutableExec);
-                exit(-1);
+			char instrucciones[60]={""};
+            strcat(instrucciones,archivoEntrada);
+            strcat(instrucciones,",");
+            strcat(instrucciones,nlineaInicia);
+            strcat(instrucciones,",");
+            strcat(instrucciones,cadenaBuscar);
+            strcat(instrucciones,",");
+            strcat(instrucciones,nlineasporProcesos);
+            strcat(instrucciones,",");
 
+            pid = fork();
+			if (pid == 0){
+                //Soy el hijo
+                close(arrPipes[i][ESCRITURA]); //Como el hijo no va a escribir, cierra el descriptor de escritura
+                printf("al parecer soy el hijo y mi pid es: %i\n" , getpid());
+                printf("mi padre debería ser el que tiene pid: %i\n", getppid() );
+                dup2(arrPipes[i][LECTURA], STDIN_FILENO);
+                execv(pl[0], pl);
 
 			}else if(pid > 0){
 				//Soy tu padre!
-                close(pipes[LECTURA]);
-                write(pipes[ESCRITURA],instrucciones,sizeof(instrucciones));
+                close(arrPipes[i][LECTURA]); //El padre no va a leer, por lo tanto se cierra su descriptor
+                write(arrPipes[i][ESCRITURA], instrucciones, 60*sizeof(char));
+                printf("al parecer soy el padre y mi pid es: %i\n" , getpid());
                 waitpid(pid, &status,0);
-                lineaInicia+= lineasporProcesos;
-
-
-
+                lineaInicia+= lineasporProcesos+1;
 			}else{
 				//Problemas
 				exit(-1);
@@ -133,7 +147,7 @@ int main(int argc, char** argv){
 
 
         
-    }else if(diferenciaLineProce < 0){//El ultimo proceso queda con menos lineas
+    /*}else if(diferenciaLineProce < 0){//El ultimo proceso queda con menos lineas
         for (int i = 0; i < numeroProcesos -1; i++){
             //crear proceso hijo y dar (lineasporProceso) Lineas
         }
@@ -143,7 +157,7 @@ int main(int argc, char** argv){
             //crear proceso hijo y dar (lineasporProceso) Lineas
         }
         //crear proceso hijo y dar procesos restantes (diferenciaLineProce) Lineas
-    }
+    }*/
 
 
 }
