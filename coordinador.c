@@ -11,8 +11,9 @@ int main(int argc, char** argv){
 	
 
 	int numeroProcesos,lineasArchivo;
-    char* archivoEntrada,cadenaBuscar;
+    char* archivoEntrada,*cadenaBuscar;
     int flag;
+    char *mflag;
     int c;
 
     while (( (c = getopt(argc, argv, "i:n:c:p:d")) != -1)){
@@ -20,8 +21,10 @@ int main(int argc, char** argv){
         {
         case 'i':
 			//./ejecutable -i archivo.txt
-			if(optarg != 0){
-				printf("Ingreso de parametro i incorrecto!");
+            mflag = optarg; 
+			if(optarg == 0){
+				printf("\nIngreso de parametro i incorrecto! \n");
+                exit(EXIT_FAILURE);
 			}else{
 				archivoEntrada = optarg;
 			}
@@ -29,8 +32,10 @@ int main(int argc, char** argv){
 
         case 'n':
 			//./ejecutable -i archivo.txt
-			if(optarg != 0){
-				printf("Ingreso de parametro n incorrecto!");
+            mflag = optarg; 
+            if(optarg == 0){
+				printf("\nIngreso de parametro n incorrecto!\n");
+                exit(EXIT_FAILURE);
 			}else{
 				numeroProcesos = atof(optarg);
 			}
@@ -38,8 +43,10 @@ int main(int argc, char** argv){
 
 		case 'c':
 			//./ejecutable -i archivo.txt
-			if(optarg != 0){
-				printf("Ingreso de parametro c incorrecto!");
+			mflag = optarg; 
+            if(optarg == 0){
+				printf("\nIngreso de parametro c incorrecto!\n");
+                exit(EXIT_FAILURE);
 			}else{
 				lineasArchivo = atof(optarg);
 			}
@@ -47,8 +54,9 @@ int main(int argc, char** argv){
     
         case 'p':
 			//./ejecutable -i archivo.txt
-			if(optarg != 0){
-				printf("Ingreso de parametro p incorrecto!");
+			if(optarg == 0){
+				printf("\nIngreso de parametro p incorrecto!\n");
+                exit(EXIT_FAILURE);
 			}else{
 				cadenaBuscar = optarg;
 			}
