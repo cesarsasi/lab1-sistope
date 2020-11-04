@@ -90,6 +90,12 @@ int main(int argc, char** argv){
 	//Programa coordinador                            Procesos no puede ser 0 !!!!!!!
     //Proceso Coordinador
     //Calculo de lineas por proceso
+    if(numeroProcesos==0){
+    	if (flag == 1){
+            printf("No puede haber 0 procesos!\n");
+        }
+    	exit(-1);
+    }
     int lineasporProcesos = lineasArchivo/numeroProcesos;
     int diferenciaLineProce = lineasArchivo - lineasporProcesos*numeroProcesos;
     if(lineasporProcesos == 0){
@@ -100,7 +106,7 @@ int main(int argc, char** argv){
             controlAcceso2 = lineasArchivo;
         }else{
             if (flag == 1){
-                printf("No hay lineas que procesar!");
+                printf("No hay lineas que procesar!\n");
             }
             exit(-1);
         }
