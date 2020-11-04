@@ -83,42 +83,28 @@ int main(int argc, char** argv){
     }
     
 	pid_t pid;
-    int status,accesoLectura,accesoLectura2;
+    int status;
 
     char *pl[] = {"comparador", NULL};
 
 	//Programa coordinador                            Procesos no puede ser 0 !!!!!!!
     //Proceso Coordinador
     //Calculo de lineas por proceso
-    int lineasporProcesos = lineasArchivo/numeroProcesos;                        
-    int diferenciaLineProce = lineasArchivo - lineasporProcesos*numeroProcesos; 
-    //if(diferenciaLineProce == 0 ){//Las lineas se distribuyen equitativamente en cantidad divLineProce
-    //Condicion casos bordes 
-    if(lineasporProcesos == 0){
-        if(lineasArchivo<numeroProcesos){
-            //añadir crear bandera para crear [lineasArchivo] archivos con 1 linea y el resto sin archivos
-            lineasporProcesos = 1;
-            accesoLectura = lineasArchivo;
-            accesoLectura2 = lineasArchivo;
-        }else if (lineasArchivo == 0){
-            //crear procesos hijos sin lectura
-            //Print error linea archivo CEROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-            exit(-1);
-        } 
-    }
-    int lineaInicia = 0;
-    //Creacion archivo final
-    char nombreArchivoFinal[100]= "rc_";
-    strcat(nombreArchivoFinal,cadenaBuscar);
-    strcat(nombreArchivoFinal,".txt");
-    FILE * archivoFinal;
-    archivoFinal=fopen(nombreArchivoFinal,"w");
-    fclose(archivoFinal);
+    int lineasporProcesos = lineasArchivo/numeroProcesos;
+    int diferenciaLineProce = lineasArchivo - lineasporProcesos*numeroProcesos;
+    if(diferenciaLineProce == 0 ){//Las lineas se distribuyen equitativamente en cantidad divLineProce
+		int lineaInicia = 0;
+		//Creacion archivo final
+		char nombreArchivoFinal[100]= "rc_";
+        strcat(nombreArchivoFinal,cadenaBuscar);
+        strcat(nombreArchivoFinal,".txt");
+		FILE * archivoFinal;
+        archivoFinal=fopen(nombreArchivoFinal,"w");
+        fclose(archivoFinal);
 
-    FILE *archivoRP;
-    archivoRP=fopen("nombresRp.txt", "w");
-    fclose(archivoRP);
-    
+        FILE *archivoRP;
+        archivoRP=fopen("nombresRp.txt", "w");
+        fclose(archivoRP);
 
         for (int  i = 0; i < numeroProcesos; i++){
             //crear proceso hijo y dar (lineasporProceso) Lineas
@@ -126,12 +112,15 @@ int main(int argc, char** argv){
             sprintf(nlineaInicia,"%d",lineaInicia);
             sprintf(nlineasporProcesos,"%d",lineasporProcesos);
 
-        printf("\n%d--------------------------------lpp\n",lineasporProcesos);
-        printf("\n%d--------------------------------lIn\n",lineaInicia);
-        //crear proceso hijo y dar (lineasporProceso) Lineas
-        char nlineaInicia[100], nlineasporProcesos[100];
-        sprintf(nlineaInicia,"%d",lineaInicia);
-        sprintf(nlineasporProcesos,"%d",lineasporProcesos);
+			char instrucciones[60]={""};
+            strcat(instrucciones,archivoEntrada);
+            strcat(instrucciones,",");
+            strcat(instrucciones,nlineaInicia);
+            strcat(instrucciones,",");
+            strcat(instrucciones,cadenaBuscar);
+            strcat(instrucciones,",");
+            strcat(instrucciones,nlineasporProcesos);
+            strcat(instrucciones,",");
 
             pid = fork();
 			if (pid == 0){
@@ -152,29 +141,10 @@ int main(int argc, char** argv){
 	            fprintf(archivoRp, "%s,", nombreArchivoParcial);
 	            fclose(archivoRp);
 
-            printf("mi padre debería ser el que tiene pid: %i\n", getppid() );
-            dup2(arrPipes[i][LECTURA], STDIN_FILENO);
-            //nombre archivo parcial
-            char nombreArchivoParcial[100]= "rp_";
-            strcat(nombreArchivoParcial,cadenaBuscar);
-            strcat(nombreArchivoParcial,"_");
-            int pidParcial = getpid();
-            char pidHijo[100];
-            sprintf(pidHijo,"%d",pidParcial);
-            strcat(nombreArchivoParcial,pidHijo);
-            strcat(nombreArchivoParcial,".txt");
-            
-            archivoRp=fopen("nombresRp.txt","a");
-            fprintf(archivoRp, "%s,", nombreArchivoParcial);
-            fclose(archivoRp);
-            //excev
 
-            if(lineasporProcesos == 0 && lineasArchivo>0 && accesoLectura>0){
-                execv(pl[0], pl); 
-                accesoLectura-=1;
-            }else if(lineasporProcesos != 0){
+	            //excev
                 execv(pl[0], pl);
-            }
+                
 
 			}else if(pid > 0){
 				//Soy tu padre!
@@ -188,7 +158,6 @@ int main(int argc, char** argv){
 			}
 			lineaInicia+= lineasporProcesos+2;
         }
-        lineaInicia+= lineasporProcesos+2;
 
 		//wait procesos y juntar formato rp_cadena_PID.txt y cantidad de procesos
 		char lineasRp[200];
@@ -238,8 +207,13 @@ int main(int argc, char** argv){
         for (int i = 0; i < numeroProcesos -1; i++){
             //crear proceso hijo y dar (lineasporProceso) Lineas
         }
-        fclose(archivoRp);
-        fclose(archivoFinal);
-        nombre = strtok(NULL,",");
-    }
+        //dar procesos restantes (diferenciaLineProce)
+    }else if(diferenciaLineProce > 0){//El ultimo proceso queda con (diferenciaLineProce) mas lineas.
+        for (int i = 0; i < numeroProcesos -1; i++){
+            //crear proceso hijo y dar (lineasporProceso) Lineas
+        }
+        //crear proceso hijo y dar procesos restantes (diferenciaLineProce) Lineas
+    }*/
+
+
 }
