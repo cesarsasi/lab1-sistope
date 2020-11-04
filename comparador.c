@@ -30,20 +30,15 @@ int main(int argc, char** argv){
 
     read(STDIN_FILENO,instruccionesREC,60*sizeof(char));
     //seprar variables
-    printf("%s\n", instruccionesREC);
     char * instruccion = strtok(instruccionesREC,",");
     char * archivoSTR = instruccion;
-    printf("---%s\n", archivoSTR);
     instruccion = strtok(NULL,",");
     char * primeralineaSTR = instruccion;
-    printf("---%s\n", primeralineaSTR);
     primeraLinea = atoi(primeralineaSTR);
     instruccion = strtok(NULL,",");
     char * cadena = instruccion;
-    printf("---%s\n", cadena);
     instruccion = strtok(NULL,",");
     char * cantidadLineasSTR = instruccion;
-    printf("---%s\n", cantidadLineasSTR);
     cantidadLineas = atoi(cantidadLineasSTR);
 
     archivo = fopen(archivoSTR, "r");
@@ -71,11 +66,12 @@ void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primera
     //Almacenar 
     int largo;
     largo = leerLargoLinea(nombreArchivo);
-    printf("\n largo linea %d \n",largo);
     char matrizArchivo[cantidadLineas][largo+1];
     //Cadena que almacenare momentaneamente las lineas que no correspondan a revisar
     char lineasX[largo+1];
     //Dejo el puntero hasta la linea que se desea comenzar a leer
+    ////////////////////////////////////PROBLEMA CON PUNTERO//////////////////////////////////////
+    //si primeraLInea es 0 no se hace nada, pero si es mayor al terminar de posicionar el puntero se hace getc
     for(int i=0; i<primeraLinea; i++){
         fgets(lineasX,largo+1,archivo);
     }
@@ -84,14 +80,6 @@ void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primera
         for(int j=0 ; j < largo+1; j++){
             fscanf(archivo, "%c", &matrizArchivo[i][j]);
         }
-    }
-
-    //Prueba print matriz
-    for(int i =0 ; i < cantidadLineas; i++){
-        for(int j=0 ; j < largo+1; j++){
-            printf("%c", matrizArchivo[i][j]);
-        }
-        printf("\n");
     }
 
     //Buscar match y escribir resultado
@@ -106,7 +94,6 @@ void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primera
             j++;
         }
         if(match != 0){
-            printf("\n Match fila %d", i+1);
             FILE *salida;
             salida= fopen(rp,"a");
             for(int k =i ; k <= i; k++){
@@ -118,7 +105,6 @@ void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primera
             }
             fclose(salida);
         }else{
-            printf("\n No Match fila %d", i+1);
 
             FILE *salida;
             salida= fopen(rp,"a");

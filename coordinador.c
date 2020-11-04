@@ -76,15 +76,6 @@ int main(int argc, char** argv){
 			break;
         }
     }
-    printf("el archivo de entrada es: %s\n",archivoEntrada);
-    printf("el numero de procesos es: %d\n",numeroProcesos);
-	printf("el numero de lineas es: %d\n",lineasArchivo);
-    printf("la cadena ingresada es: %s\n",cadenaBuscar);
-
-	if (flag != 0){
-		printf("Hay Banderita!");
-	}
-
     int **arrPipes = (int**)malloc(sizeof(int *)*numeroProcesos);
     for (int i = 0; i < numeroProcesos; i++){
         arrPipes[i]= (int*)malloc(sizeof(int)*2);
@@ -116,8 +107,6 @@ int main(int argc, char** argv){
         fclose(archivoRP);
 
         for (int  i = 0; i < numeroProcesos; i++){
-            printf("\n%d--------------------------------lpp\n",lineasporProcesos);
-            printf("\n%d--------------------------------lIn\n",lineaInicia);
             //crear proceso hijo y dar (lineasporProceso) Lineas
             char nlineaInicia[100], nlineasporProcesos[100];
             sprintf(nlineaInicia,"%d",lineaInicia);
@@ -137,9 +126,6 @@ int main(int argc, char** argv){
 			if (pid == 0){
                 //Soy el hijo
                 close(arrPipes[i][ESCRITURA]); //Como el hijo no va a escribir, cierra el descriptor de escritura
-                printf("al parecer soy el hijo y mi pid es: %i\n" , getpid());
-
-                printf("mi padre debería ser el que tiene pid: %i\n", getppid() );
                 dup2(arrPipes[i][LECTURA], STDIN_FILENO);
                 //nombre archivo parcial
                 char nombreArchivoParcial[100]= "rp_";
@@ -164,7 +150,6 @@ int main(int argc, char** argv){
 				//Soy tu padre!
                 close(arrPipes[i][LECTURA]); //El padre no va a leer, por lo tanto se cierra su descriptor
                 write(arrPipes[i][ESCRITURA], instrucciones, 60*sizeof(char));
-                printf("al parecer soy el padre y mi pid es: %i\n" , getpid());
                 waitpid(pid, &status,0);
                 
 			}else{
@@ -179,7 +164,11 @@ int main(int argc, char** argv){
         archivoRp=fopen("nombresRp.txt","r");
         fgets(lineasRp,200,archivoRp);
         fclose(archivoRp);
+        char lineasMostrar[200];
 
+        if (flag == 1){
+        	printf("\nSE INGRESO BANDERA -d, LOS RESULTADOS SON:\n");
+		}
 
         char *nombre = strtok(lineasRp,",");
         for (int i = 0; i < numeroProcesos; i++){
@@ -193,12 +182,26 @@ int main(int argc, char** argv){
             }
             fclose(archivoRp);
             fclose(archivoFinal);
+
+            if (flag == 1){
+            	archivoRp=fopen(nombre,"r");
+            	printf("\n%s\n",nombre);
+            	while((data1 = fgetc(archivoRp)) != EOF){
+					printf("%c",data1);
+            	}
+            	fclose(archivoRp);
+			}
             nombre = strtok(NULL,",");
         }
-        
-
-
-
+        if (flag == 1){
+        	char data2;
+        	printf("\n%s\n",nombreArchivoFinal);
+        	archivoFinal=fopen(nombreArchivoFinal,"r");
+        	while((data2 = fgetc(archivoFinal)) != EOF){
+				printf("%c",data2);
+        	}
+        	fclose(archivoFinal);
+		}
         
     }/*}else if(diferenciaLineProce < 0){//El ultimo proceso queda con menos lineas
         for (int i = 0; i < numeroProcesos -1; i++){
