@@ -10,9 +10,7 @@
 #define ESCRITURA 1
 #define LECTURA 0
 
-FILE * archivoFinal;
 FILE * archivoRp ;
-
 //Funciones
 //Main programa coordinador
 int main(int argc, char** argv){
@@ -105,7 +103,18 @@ int main(int argc, char** argv){
     int diferenciaLineProce = lineasArchivo - lineasporProcesos*numeroProcesos;
     if(diferenciaLineProce == 0 ){//Las lineas se distribuyen equitativamente en cantidad divLineProce
 		int lineaInicia = 0;
-        int *pidHijos = (int*)malloc(sizeof(int)*numeroProcesos);
+		//Creacion archivo final
+		char nombreArchivoFinal[100]= "rc_";
+        strcat(nombreArchivoFinal,cadenaBuscar);
+        strcat(nombreArchivoFinal,".txt");
+		FILE * archivoFinal;
+        archivoFinal=fopen(nombreArchivoFinal,"w");
+        fclose(archivoFinal);
+
+        FILE *archivoRP;
+        archivoRP=fopen("nombresRp.txt", "w");
+        fclose(archivoRP);
+
         for (int  i = 0; i < numeroProcesos; i++){
             printf("\n%d--------------------------------lpp\n",lineasporProcesos);
             printf("\n%d--------------------------------lIn\n",lineaInicia);
@@ -129,10 +138,27 @@ int main(int argc, char** argv){
                 //Soy el hijo
                 close(arrPipes[i][ESCRITURA]); //Como el hijo no va a escribir, cierra el descriptor de escritura
                 printf("al parecer soy el hijo y mi pid es: %i\n" , getpid());
-                pidHijos[i]=getpid();
+
                 printf("mi padre debería ser el que tiene pid: %i\n", getppid() );
                 dup2(arrPipes[i][LECTURA], STDIN_FILENO);
+                //nombre archivo parcial
+                char nombreArchivoParcial[100]= "rp_";
+	            strcat(nombreArchivoParcial,cadenaBuscar);
+	            strcat(nombreArchivoParcial,"_");
+	            int pidParcial = getpid();
+	            char pidHijo[100];
+	            sprintf(pidHijo,"%d",pidParcial);
+	            strcat(nombreArchivoParcial,pidHijo);
+	            strcat(nombreArchivoParcial,".txt");
+	            
+	            archivoRp=fopen("nombresRp.txt","a");
+	            fprintf(archivoRp, "%s,", nombreArchivoParcial);
+	            fclose(archivoRp);
+
+
+	            //excev
                 execv(pl[0], pl);
+                
 
 			}else if(pid > 0){
 				//Soy tu padre!
@@ -149,35 +175,25 @@ int main(int argc, char** argv){
         }
 
 		//wait procesos y juntar formato rp_cadena_PID.txt y cantidad de procesos
-        char nombreArchivoFinal[60]= {""};
-        strcat(nombreArchivoFinal,"rc_");
-        strcat(nombreArchivoFinal,cadenaBuscar);
-        strcat(nombreArchivoFinal,".txt");
-        printf("\nHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLA\n");
-        archivoFinal = fopen(nombreArchivoFinal, "w");
-        fclose (archivoFinal);
+		char lineasRp[200];
+        archivoRp=fopen("nombresRp.txt","r");
+        fgets(lineasRp,200,archivoRp);
+        fclose(archivoRp);
 
-        printf("\n//////////////////////// %s",nombreArchivoFinal);
+
+        char *nombre = strtok(lineasRp,",");
         for (int i = 0; i < numeroProcesos; i++){
-            //printf("\n//////////////////////// %s",archivoFinal);
-            
-            char nombreArchivoParcial[60]= {""};
-            strcat(nombreArchivoParcial,"rp_");
-            strcat(nombreArchivoParcial,cadenaBuscar);
-            strcat(nombreArchivoParcial,"_");
-            char pidHijo[100];
-            sprintf(pidHijo,"%d",pidHijos[i]);
-            strcat(nombreArchivoParcial,pidHijo);
-            strcat(nombreArchivoParcial,".txt");
+
+        	archivoFinal=fopen(nombreArchivoFinal,"a");
+        	archivoRp=fopen(nombre,"r");
+
             char data1;
-            archivoRp = fopen(nombreArchivoParcial, "r");
-            archivoFinal = fopen (nombreArchivoFinal,"a");
-            
             while((data1 = fgetc(archivoRp)) != EOF){
                 fputc(data1, archivoFinal);
             }
             fclose(archivoRp);
             fclose(archivoFinal);
+            nombre = strtok(NULL,",");
         }
         
 
