@@ -102,6 +102,8 @@ int main(int argc, char** argv){
     //if(diferenciaLineProce == 0 ){//Las lineas se distribuyen equitativamente en cantidad divLineProce
 		int lineaInicia = 0;
         for (int  i = 0; i < numeroProcesos; i++){
+            printf("\n%d--------------------------------lpp\n",lineasporProcesos);
+            printf("\n%d--------------------------------lIn\n",lineaInicia);
             //crear proceso hijo y dar (lineasporProceso) Lineas
             char nlineaInicia[100], nlineasporProcesos[100];
             sprintf(nlineaInicia,"%d",lineaInicia);
@@ -132,12 +134,12 @@ int main(int argc, char** argv){
                 write(arrPipes[i][ESCRITURA], instrucciones, 60*sizeof(char));
                 printf("al parecer soy el padre y mi pid es: %i\n" , getpid());
                 waitpid(pid, &status,0);
-                lineaInicia+= lineasporProcesos;
+                
 			}else{
 				//Problemas
 				exit(-1);
 			}
-			
+			lineaInicia+= lineasporProcesos+2;
 
         }
 
