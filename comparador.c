@@ -94,7 +94,7 @@ void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primera
         printf("\n");
     }
 
-    //
+    //Buscar match y escribir resultado
     int i=0;
     int j=0;
     int match = 0;
