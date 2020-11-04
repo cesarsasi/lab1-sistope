@@ -9,6 +9,10 @@
 
 #define ESCRITURA 1
 #define LECTURA 0
+
+FILE * archivoFinal;
+FILE * archivoRp ;
+
 //Funciones
 //Main programa coordinador
 int main(int argc, char** argv){
@@ -99,8 +103,9 @@ int main(int argc, char** argv){
     //Calculo de lineas por proceso
     int lineasporProcesos = lineasArchivo/numeroProcesos;
     int diferenciaLineProce = lineasArchivo - lineasporProcesos*numeroProcesos;
-    //if(diferenciaLineProce == 0 ){//Las lineas se distribuyen equitativamente en cantidad divLineProce
+    if(diferenciaLineProce == 0 ){//Las lineas se distribuyen equitativamente en cantidad divLineProce
 		int lineaInicia = 0;
+        int *pidHijos = (int*)malloc(sizeof(int)*numeroProcesos);
         for (int  i = 0; i < numeroProcesos; i++){
             printf("\n%d--------------------------------lpp\n",lineasporProcesos);
             printf("\n%d--------------------------------lIn\n",lineaInicia);
@@ -124,6 +129,7 @@ int main(int argc, char** argv){
                 //Soy el hijo
                 close(arrPipes[i][ESCRITURA]); //Como el hijo no va a escribir, cierra el descriptor de escritura
                 printf("al parecer soy el hijo y mi pid es: %i\n" , getpid());
+                pidHijos[i]=getpid();
                 printf("mi padre debería ser el que tiene pid: %i\n", getppid() );
                 dup2(arrPipes[i][LECTURA], STDIN_FILENO);
                 execv(pl[0], pl);
@@ -140,15 +146,45 @@ int main(int argc, char** argv){
 				exit(-1);
 			}
 			lineaInicia+= lineasporProcesos+2;
-
         }
 
+		//wait procesos y juntar formato rp_cadena_PID.txt y cantidad de procesos
+        char nombreArchivoFinal[60]= {""};
+        strcat(nombreArchivoFinal,"rc_");
+        strcat(nombreArchivoFinal,cadenaBuscar);
+        strcat(nombreArchivoFinal,".txt");
+        printf("\nHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLA\n");
+        archivoFinal = fopen(nombreArchivoFinal, "w");
+        fclose (archivoFinal);
 
-		//wait procesos y juntar
+        printf("\n//////////////////////// %s",nombreArchivoFinal);
+        for (int i = 0; i < numeroProcesos; i++){
+            //printf("\n//////////////////////// %s",archivoFinal);
+            
+            char nombreArchivoParcial[60]= {""};
+            strcat(nombreArchivoParcial,"rp_");
+            strcat(nombreArchivoParcial,cadenaBuscar);
+            strcat(nombreArchivoParcial,"_");
+            char pidHijo[100];
+            sprintf(pidHijo,"%d",pidHijos[i]);
+            strcat(nombreArchivoParcial,pidHijo);
+            strcat(nombreArchivoParcial,".txt");
+            char data1;
+            archivoRp = fopen(nombreArchivoParcial, "r");
+            archivoFinal = fopen (nombreArchivoFinal,"a");
+            
+            while((data1 = fgetc(archivoRp)) != EOF){
+                fputc(data1, archivoFinal);
+            }
+            fclose(archivoRp);
+            fclose(archivoFinal);
+        }
+        
+
 
 
         
-    /*}else if(diferenciaLineProce < 0){//El ultimo proceso queda con menos lineas
+    }/*}else if(diferenciaLineProce < 0){//El ultimo proceso queda con menos lineas
         for (int i = 0; i < numeroProcesos -1; i++){
             //crear proceso hijo y dar (lineasporProceso) Lineas
         }
