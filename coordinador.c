@@ -103,7 +103,6 @@ int main(int argc, char** argv){
 		int lineaInicia = 0;
         for (int  i = 0; i < numeroProcesos; i++){
             //crear proceso hijo y dar (lineasporProceso) Lineas
-
             char nlineaInicia[100], nlineasporProcesos[100];
             sprintf(nlineaInicia,"%d",lineaInicia);
             sprintf(nlineasporProcesos,"%d",lineasporProcesos);
@@ -133,7 +132,7 @@ int main(int argc, char** argv){
                 write(arrPipes[i][ESCRITURA], instrucciones, 60*sizeof(char));
                 printf("al parecer soy el padre y mi pid es: %i\n" , getpid());
                 waitpid(pid, &status,0);
-                lineaInicia+= lineasporProcesos+1;
+                lineaInicia+= lineasporProcesos;
 			}else{
 				//Problemas
 				exit(-1);

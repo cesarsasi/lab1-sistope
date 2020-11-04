@@ -79,8 +79,11 @@ void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primera
     for(int i=0; i<primeraLinea; i++){
         fgets(lineasX,largo+1,archivo);
     }
+    if(primeraLinea != 0){
+        fgets(lineasX,largo+1,archivo);
+    }
     //Hago el almacenamiento de las lineas necesarias
-    for(int i =0 ; i < cantidadLineas; i++){
+    for(int i = 0; i < cantidadLineas; i++){
         for(int j=0 ; j < largo+1; j++){
             fscanf(archivo, "%c", &matrizArchivo[i][j]);
         }
@@ -94,7 +97,7 @@ void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primera
         printf("\n");
     }
 
-    //
+    //Escritura
     int i=0;
     int j=0;
     int match = 0;
