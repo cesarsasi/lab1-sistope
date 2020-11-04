@@ -121,6 +121,9 @@ int main(int argc, char** argv){
 
     for (int  i = 0; i < numeroProcesos; i++){
         //crear proceso hijo y dar (lineasporProceso) Lineas
+        if (diferenciaLineProce > 0 && i == numeroProcesos-1){
+                lineasporProcesos += diferenciaLineProce;
+            }
         char nlineaInicia[100], nlineasporProcesos[100];
         sprintf(nlineaInicia,"%d",lineaInicia);
         sprintf(nlineasporProcesos,"%d",lineasporProcesos);
@@ -168,15 +171,11 @@ int main(int argc, char** argv){
             close(arrPipes[i][LECTURA]); //El padre no va a leer, por lo tanto se cierra su descriptor
             write(arrPipes[i][ESCRITURA], instrucciones, 60*sizeof(char));
             waitpid(pid, &status,0);
-            
         }else{
             //Problemas
             exit(-1);
         }
         lineaInicia+= lineasporProcesos+2;
-        if (diferenciaLineProce > 0 && i == numeroProcesos-1){
-            lineasporProcesos += diferenciaLineProce;
-        }
         
     }
 
