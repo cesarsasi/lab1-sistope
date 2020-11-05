@@ -1,1 +1,1 @@
-rp_AAAA_7298.txt,rp_AAAA_7301.txt,rp_AAAA_7302.txt,rp_AAAA_7303.txt,
+archivos/rp_AAAA_21270.txt,archivos/rp_AAAA_21271.txt,archivos/rp_AAAA_21272.txt,

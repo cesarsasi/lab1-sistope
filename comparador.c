@@ -50,7 +50,7 @@ int main(int argc, char** argv){
 //Casos borde: (fin)largo-3 || (linea menor a secuencia)largo < 4
 void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador){
     //NOMbre
-    char rp[100]="rp_";
+    char rp[100]="archivos/rp_";
     strcat(rp,cadena);
     char pid[100];
     sprintf(pid,"%d",identificador);
@@ -73,7 +73,7 @@ void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primera
     ////////////////////////////////////PROBLEMA CON PUNTERO//////////////////////////////////////
     //si primeraLInea es 0 no se hace nada, pero si es mayor al terminar de posicionar el puntero se hace getc
     for(int i=0; i<primeraLinea; i++){
-        fgets(lineasX,largo+1,archivo);
+        fgets(lineasX,largo,archivo);
     }
     //Hago el almacenamiento de las lineas necesarias
     for(int i =0 ; i < cantidadLineas; i++){

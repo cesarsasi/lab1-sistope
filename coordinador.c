@@ -151,7 +151,7 @@ int main(int argc, char** argv){
             dup2(arrPipes[i][LECTURA], STDIN_FILENO);
             //nombre archivo parcial
             
-            char nombreArchivoParcial[100]= "rp_";
+            char nombreArchivoParcial[100]= "archivos/rp_";
             strcat(nombreArchivoParcial,cadenaBuscar);
             strcat(nombreArchivoParcial,"_");
             int pidParcial = getpid();
