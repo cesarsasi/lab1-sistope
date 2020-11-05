@@ -84,6 +84,7 @@ int main(int argc, char** argv){
     
 	pid_t pid;
     int status,controlAcceso1,controlAcceso2;
+    int bandera = 0;
 
     char *pl[] = {"comparador", NULL};
 
@@ -102,6 +103,7 @@ int main(int argc, char** argv){
         //caso no caen procesos en lineas
         if (lineasArchivo>0){
             lineasporProcesos = 1;
+            bandera=1;
             controlAcceso1 = lineasArchivo;
             controlAcceso2 = lineasArchivo;
         }else{
@@ -129,7 +131,11 @@ int main(int argc, char** argv){
         //crear proceso hijo y dar (lineasporProceso) Lineas
         if (diferenciaLineProce > 0 && i == numeroProcesos-1){
                 lineasporProcesos += diferenciaLineProce;
-            }
+        }
+        if(bandera == 1 && controlAcceso1>=0){
+            controlAcceso1-=1;
+        }
+
         char nlineaInicia[100], nlineasporProcesos[100];
         sprintf(nlineaInicia,"%d",lineaInicia);
         sprintf(nlineasporProcesos,"%d",lineasporProcesos);
@@ -159,18 +165,21 @@ int main(int argc, char** argv){
             sprintf(pidHijo,"%d",pidParcial);
             strcat(nombreArchivoParcial,pidHijo);
             strcat(nombreArchivoParcial,".txt");
-            if(lineasporProcesos == 0 && controlAcceso1>0){
+            if(bandera == 1 && controlAcceso1>=0){
                 archivoRp=fopen("nombresRp.txt","a");
                 fprintf(archivoRp, "%s,", nombreArchivoParcial);
                 fclose(archivoRp);
                 //excev
                 execv(pl[0], pl);
-                controlAcceso1--;
-            }else if(lineasporProcesos != 0){
+                
+            }else if(bandera == 0){
                 archivoRp=fopen("nombresRp.txt","a");
                 fprintf(archivoRp, "%s,", nombreArchivoParcial);
                 fclose(archivoRp);
                 execv(pl[0], pl);
+            }
+            if(bandera == 1 && controlAcceso1<0){
+                exit(-1);
             }
         }else if(pid > 0){
             //Soy tu padre!
@@ -186,18 +195,18 @@ int main(int argc, char** argv){
     }
 
     //wait procesos y juntar formato rp_cadena_PID.txt y cantidad de procesos
-    char lineasRp[200];
+    char lineasRp[1024];
     archivoRp=fopen("nombresRp.txt","r");
-    fgets(lineasRp,200,archivoRp);
+    fgets(lineasRp,1024,archivoRp);
     fclose(archivoRp);
-    char lineasMostrar[200];
+    char lineasMostrar[1024];
 
     if (flag == 1){
         printf("\nSE INGRESO BANDERA -d, LOS RESULTADOS SON:\n");
     }
 
     char *nombre = strtok(lineasRp,",");
-    if (lineasporProcesos == 0){
+    if (bandera == 1){
         numeroProcesos = controlAcceso2;
     }
     
