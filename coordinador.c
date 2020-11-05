@@ -181,7 +181,7 @@ int main(int argc, char** argv){
             //Problemas
             exit(-1);
         }
-        lineaInicia+= lineasporProcesos+2;
+        lineaInicia+= lineasporProcesos;
         
     }
 

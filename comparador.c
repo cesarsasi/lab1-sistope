@@ -73,7 +73,7 @@ void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primera
     ////////////////////////////////////PROBLEMA CON PUNTERO//////////////////////////////////////
     //si primeraLInea es 0 no se hace nada, pero si es mayor al terminar de posicionar el puntero se hace getc
     for(int i=0; i<primeraLinea; i++){
-        fgets(lineasX,largo,archivo);
+        fgets(lineasX,largo+2,archivo);
     }
     //Hago el almacenamiento de las lineas necesarias
     for(int i =0 ; i < cantidadLineas; i++){
