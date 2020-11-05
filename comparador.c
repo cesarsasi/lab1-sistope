@@ -13,14 +13,17 @@
 #define LECTURA 0
 #define ESCRITURA 1
 
-
-//Funciones
-void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador);
-int leerLargoLinea(char * archivo);
+//Inicializar punteros dedicados a los archivos a manejar
 FILE *archivo;
 FILE *fichero2;
 
-//Main programa comparador 
+//Declaracion de funciones
+void comparar(FILE * archivo,char * nombreArchivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador);
+int leerLargoLinea(char * archivo);
+
+//Funcion main comparador
+//Entreada:
+//Salida  :
 int main(int argc, char** argv){
 
     int pid=getpid();
@@ -42,13 +45,16 @@ int main(int argc, char** argv){
     cantidadLineas = atoi(cantidadLineasSTR);
 
     archivo = fopen(archivoSTR, "r");
-    guardarLineas(archivo, archivoSTR, cadena, primeraLinea, cantidadLineas, pid);
+    comparar(archivo, archivoSTR, cadena, primeraLinea, cantidadLineas, pid);
     fclose(archivo);
 }
 
+//Funcion
+//Entrada :
+//Salida  :
 //Buscar Secuencia del tipo XXXX en una lista
 //Casos borde: (fin)largo-3 || (linea menor a secuencia)largo < 4
-void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador){
+void comparar(FILE * archivo,char * nombreArchivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador){
     //NOMbre
     char rp[100]="archivos/rp_";
     strcat(rp,cadena);
@@ -57,12 +63,10 @@ void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primera
     strcat(rp,"_");
     strcat(rp,pid);
     strcat(rp,".txt");
-
-    //Se crea
+    //Se inicializa el archivo parcial
     FILE *salida;
     salida=fopen(rp,"w");
     fclose(salida);
-
     //Almacenar 
     int largo;
     largo = leerLargoLinea(nombreArchivo);
@@ -70,7 +74,6 @@ void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primera
     //Cadena que almacenare momentaneamente las lineas que no correspondan a revisar
     char lineasX[largo+1];
     //Dejo el puntero hasta la linea que se desea comenzar a leer
-    ////////////////////////////////////PROBLEMA CON PUNTERO//////////////////////////////////////
     //si primeraLInea es 0 no se hace nada, pero si es mayor al terminar de posicionar el puntero se hace getc
     for(int i=0; i<primeraLinea; i++){
         fgets(lineasX,largo+2,archivo);
@@ -81,7 +84,6 @@ void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primera
             fscanf(archivo, "%c", &matrizArchivo[i][j]);
         }
     }
-
     //Buscar match y escribir resultado
     int i=0;
     int j=0;
@@ -105,7 +107,6 @@ void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primera
             }
             fclose(salida);
         }else{
-
             FILE *salida;
             salida= fopen(rp,"a");
             for(int k =i ; k <= i; k++){
@@ -123,6 +124,9 @@ void guardarLineas(FILE * archivo,char * nombreArchivo,char cadena[],int primera
     }
 }
 
+//Funcion
+//Entrada :
+//Salida  :
 int leerLargoLinea(char * archivo){
     fichero2 = fopen(archivo, "r");
     //Obtencion del largo con la primera fila 

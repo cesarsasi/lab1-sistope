@@ -3,28 +3,29 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include <sys/wait.h> //Define las constantes simbólicas para usar con waitpid(), wait() por ejemplo
+#include <sys/wait.h>  //Define las constantes simbólicas para usar con waitpid(), wait() por ejemplo
 #include <sys/types.h> //define varios tipos de datos como pid_t
 #include <sys/stat.h>
 
 #define ESCRITURA 1
 #define LECTURA 0
-
+//Variable Global para archivos con resultados parciales.
 FILE * archivoRp ;
-//Funciones
-//Main programa coordinador
-int main(int argc, char** argv){
-	
 
+
+//Funcion
+//Entrada :
+//Salida  :
+int main(int argc, char** argv){
 	int numeroProcesos,lineasArchivo;
     char* archivoEntrada,*cadenaBuscar;
     int flag;
     char *mflag;
     int c;
-    
+    //inicializa el pipe
     int *pipes = (int*)malloc(sizeof(int)*2);
-    pipe(pipes); //inicializa el pipe
-
+    pipe(pipes); 
+    //Leer contenido de los parametros iniciales en el comando ejecutado
     while (( (c = getopt(argc, argv, "i:n:c:p:d")) != -1)){
         switch (c)
         {
@@ -38,7 +39,6 @@ int main(int argc, char** argv){
 				archivoEntrada = optarg;
 			}
         	break;
-
         case 'n':
 			//./ejecutable -i archivo.txt
             mflag = optarg; 
@@ -49,7 +49,6 @@ int main(int argc, char** argv){
 				numeroProcesos = atof(optarg);
 			}
         	break;
-
 		case 'c':
 			//./ejecutable -i archivo.txt
 			mflag = optarg; 
@@ -60,7 +59,6 @@ int main(int argc, char** argv){
 				lineasArchivo = atof(optarg);
 			}
         	break;			
-    
         case 'p':
 			//./ejecutable -i archivo.txt
 			if(optarg == 0){
@@ -70,7 +68,6 @@ int main(int argc, char** argv){
 				cadenaBuscar = optarg;
 			}
         	break;
-
         case 'd':
 			flag = 1;
 			break;
@@ -81,14 +78,11 @@ int main(int argc, char** argv){
         arrPipes[i]= (int*)malloc(sizeof(int)*2);
         pipe(arrPipes[i]);
     }
-    
 	pid_t pid;
     int status,controlAcceso1,controlAcceso2;
     int bandera = 0;
-
     char *pl[] = {"comparador", NULL};
-
-	//Programa coordinador                            Procesos no puede ser 0 !!!!!!!
+	//Programa coordinador                            
     //Proceso Coordinador
     //Calculo de lineas por proceso
     if(numeroProcesos==0){
@@ -113,16 +107,15 @@ int main(int argc, char** argv){
             exit(-1);
         }
     }
-
     int lineaInicia = 0;
     //Creacion archivo final
     char nombreArchivoFinal[100]= "rc_";
     strcat(nombreArchivoFinal,cadenaBuscar);
     strcat(nombreArchivoFinal,".txt");
+
     FILE * archivoFinal;
     archivoFinal=fopen(nombreArchivoFinal,"w");
     fclose(archivoFinal);
-
     FILE *archivoRP;
     archivoRP=fopen("nombresRp.txt", "w");
     fclose(archivoRP);
@@ -135,7 +128,6 @@ int main(int argc, char** argv){
         if(bandera == 1 && controlAcceso1>=0){
             controlAcceso1-=1;
         }
-
         char nlineaInicia[100], nlineasporProcesos[100];
         sprintf(nlineaInicia,"%d",lineaInicia);
         sprintf(nlineasporProcesos,"%d",lineasporProcesos);
@@ -156,7 +148,6 @@ int main(int argc, char** argv){
             close(arrPipes[i][ESCRITURA]); //Como el hijo no va a escribir, cierra el descriptor de escritura
             dup2(arrPipes[i][LECTURA], STDIN_FILENO);
             //nombre archivo parcial
-            
             char nombreArchivoParcial[100]= "archivos/rp_";
             strcat(nombreArchivoParcial,cadenaBuscar);
             strcat(nombreArchivoParcial,"_");
@@ -171,7 +162,6 @@ int main(int argc, char** argv){
                 fclose(archivoRp);
                 //excev
                 execv(pl[0], pl);
-                
             }else if(bandera == 0){
                 archivoRp=fopen("nombresRp.txt","a");
                 fprintf(archivoRp, "%s,", nombreArchivoParcial);
@@ -191,27 +181,21 @@ int main(int argc, char** argv){
             exit(-1);
         }
         lineaInicia+= lineasporProcesos;
-        
     }
-
     //wait procesos y juntar formato rp_cadena_PID.txt y cantidad de procesos
     char lineasRp[1024];
     archivoRp=fopen("nombresRp.txt","r");
     fgets(lineasRp,1024,archivoRp);
     fclose(archivoRp);
     char lineasMostrar[1024];
-
     if (flag == 1){
         printf("\nSE INGRESO BANDERA -d, LOS RESULTADOS SON:\n");
     }
-
     char *nombre = strtok(lineasRp,",");
     if (bandera == 1){
         numeroProcesos = controlAcceso2;
     }
-    
     for (int i = 0; i < numeroProcesos; i++){
-
         archivoFinal=fopen(nombreArchivoFinal,"a");
         archivoRp=fopen(nombre,"r");
 
