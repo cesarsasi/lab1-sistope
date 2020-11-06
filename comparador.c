@@ -1,8 +1,8 @@
 /*
 Laboratorio 1
-Profesor   : Rannou
-Ayudante   : Benjamin
-Integrantes:    Octavio Canales 
+Profesor   : Fernando Rannou
+Ayudante   : Benjamin Muñoz
+Integrantes:    Octavio Nicolas Canales Ñirriman 20.003.610-7
                 César Antonio Salazar Silva  19.916.471-6
 Sistemas Operativos 2.2020  (Creación: 01-Noviembre-2020)
 */
@@ -59,7 +59,7 @@ int main(int argc, char** argv){
 //Casos borde: (fin)largo-3 || (linea menor a secuencia)largo < 4
 void comparar(FILE * archivo,char * nombreArchivo,char cadena[],int primeraLinea,int cantidadLineas,int identificador){
     //Se forma el nombre del archivo parcial en el que se guardará el contenido parcial
-    char rp[100]="archivos/rp_";
+    char rp[100]="rp_";
     strcat(rp,cadena);
     char pid[100];
     sprintf(pid,"%d",identificador);

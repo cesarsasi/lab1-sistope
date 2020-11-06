@@ -1,8 +1,8 @@
 /*
 Laboratorio 1
-Profesor   : Rannou
-Ayudante   : Benjamin
-Integrantes:    Octavio Canales 
+Profesor   : Fernando Rannou
+Ayudante   : Benjamin Muñoz
+Integrantes:    Octavio Nicolas Canales Ñirriman 20.003.610-7
                 César Antonio Salazar Silva  19.916.471-6
 Sistemas Operativos 2.2020  (Creación: 01-Noviembre-2020)
 */
@@ -162,7 +162,7 @@ int main(int argc, char** argv){
             close(arrPipes[i][ESCRITURA]); //Como el hijo no va a escribir, cierra el descriptor de escritura
             dup2(arrPipes[i][LECTURA], STDIN_FILENO);
             //nombre archivo parcial
-            char nombreArchivoParcial[100]= "archivos/rp_";
+            char nombreArchivoParcial[100]= "rp_";
             strcat(nombreArchivoParcial,cadenaBuscar);
             strcat(nombreArchivoParcial,"_");
             int pidParcial = getpid();
@@ -202,8 +202,6 @@ int main(int argc, char** argv){
     archivoRp=fopen("nombresRp.txt","r");
     fgets(lineasRp,1024,archivoRp);
     fclose(archivoRp);
-    //----------------------------------------------------------------------------------------------------------- En que se usa esta variable????!!!!
-    char lineasMostrar[1024];
     //Aviso de detección de bandera
     if (flag == 1){
         printf("\nSE INGRESO BANDERA -d, LOS RESULTADOS SON:\n");
