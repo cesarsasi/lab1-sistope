@@ -1,4 +1,13 @@
-//Includes
+/*
+Laboratorio 1
+Profesor   : Rannou
+Ayudante   : Benjamin
+Integrantes:    Octavio Canales 
+                César Antonio Salazar Silva  19.916.471-6
+Sistemas Operativos 2.2020  (Creación: 01-Noviembre-2020)
+*/
+
+//Se extienden librerias
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -13,24 +22,21 @@
 FILE * archivoRp ;
 
 
-//Funcion
-//Entrada :
-//Salida  :
+//BLOQUE PRINCIPAL - FUNCIONALIDAD COORDINADOR
+//Entrada : Recibe como entrada todos los argumentos de la consola, Archivo a leer, Cantidad de procesos, Cantidad de lineas, Cadena a Buscar y flag
+//Salida  : No retorna nada
 int main(int argc, char** argv){
 	int numeroProcesos,lineasArchivo;
     char* archivoEntrada,*cadenaBuscar;
     int flag;
     char *mflag;
     int c;
-    //inicializa el pipe
-    int *pipes = (int*)malloc(sizeof(int)*2);
-    pipe(pipes); 
     //Leer contenido de los parametros iniciales en el comando ejecutado
     while (( (c = getopt(argc, argv, "i:n:c:p:d")) != -1)){
         switch (c)
         {
         case 'i':
-			//./ejecutable -i archivo.txt
+			//
             mflag = optarg; 
 			if(optarg == 0){
 				printf("\nIngreso de parametro i incorrecto! \n");
@@ -40,7 +46,7 @@ int main(int argc, char** argv){
 			}
         	break;
         case 'n':
-			//./ejecutable -i archivo.txt
+			//
             mflag = optarg; 
             if(optarg == 0){
 				printf("\nIngreso de parametro n incorrecto!\n");
@@ -50,7 +56,7 @@ int main(int argc, char** argv){
 			}
         	break;
 		case 'c':
-			//./ejecutable -i archivo.txt
+			//
 			mflag = optarg; 
             if(optarg == 0){
 				printf("\nIngreso de parametro c incorrecto!\n");
@@ -60,7 +66,7 @@ int main(int argc, char** argv){
 			}
         	break;			
         case 'p':
-			//./ejecutable -i archivo.txt
+			//
 			if(optarg == 0){
 				printf("\nIngreso de parametro p incorrecto!\n");
                 exit(EXIT_FAILURE);
@@ -73,33 +79,38 @@ int main(int argc, char** argv){
 			break;
         }
     }
+    //Se inicializa un arreglo de pipes
     int **arrPipes = (int**)malloc(sizeof(int *)*numeroProcesos);
     for (int i = 0; i < numeroProcesos; i++){
         arrPipes[i]= (int*)malloc(sizeof(int)*2);
         pipe(arrPipes[i]);
     }
+    //Se inicializa la variable pid_t para manejar los procesos
 	pid_t pid;
     int status,controlAcceso1,controlAcceso2;
     int bandera = 0;
+    //Se utiliza este arreglo para guardar el nombre de un programa ejecutable[Arreglo unidimensional de caracteres]
     char *pl[] = {"comparador", NULL};
-	//Programa coordinador                            
-    //Proceso Coordinador
-    //Calculo de lineas por proceso
+	//De ser 0 procesos no se ejecuta el programa                           
     if(numeroProcesos==0){
     	if (flag == 1){
             printf("No puede haber 0 procesos!\n");
         }
     	exit(-1);
     }
+    //Proceso coordinador
+    //Se calcula cuantas lineas por proceso debe haber y cuantas lineas sobran desde el ultimo proceso
     int lineasporProcesos = lineasArchivo/numeroProcesos;
     int diferenciaLineProce = lineasArchivo - lineasporProcesos*numeroProcesos;
+    //En el caso que la division sea cero por aproximacion a entero
     if(lineasporProcesos == 0){
-        //caso no caen procesos en lineas
+        //En caso de haber lineas por leer se modifican para leer una linea por proceso
         if (lineasArchivo>0){
             lineasporProcesos = 1;
             bandera=1;
             controlAcceso1 = lineasArchivo;
             controlAcceso2 = lineasArchivo;
+        //En caso de no haber lineas no se ejecuta el programa
         }else{
             if (flag == 1){
                 printf("No hay lineas que procesar!\n");
@@ -107,6 +118,7 @@ int main(int argc, char** argv){
             exit(-1);
         }
     }
+    //Se inicializa variable en la que comenzara la lectura
     int lineaInicia = 0;
     //Creacion archivo final
     char nombreArchivoFinal[100]= "rc_";
@@ -122,16 +134,18 @@ int main(int argc, char** argv){
 
     for (int  i = 0; i < numeroProcesos; i++){
         //crear proceso hijo y dar (lineasporProceso) Lineas
+        //En caso de ser la ultima iteracion ingresa a los casos bordes por mas cantidad de lineas que los otros procesos
         if (diferenciaLineProce > 0 && i == numeroProcesos-1){
-                lineasporProcesos += diferenciaLineProce;
+            lineasporProcesos += diferenciaLineProce;
         }
+        //En caso de ser Caso borde con lineas menor que procesos, se resta hasta tener 0 lineas
         if(bandera == 1 && controlAcceso1>=0){
             controlAcceso1-=1;
         }
+        //Concadenamos las variables que se pasarán por el pipe
         char nlineaInicia[100], nlineasporProcesos[100];
         sprintf(nlineaInicia,"%d",lineaInicia);
         sprintf(nlineasporProcesos,"%d",lineasporProcesos);
-
         char instrucciones[60]={""};
         strcat(instrucciones,archivoEntrada);
         strcat(instrucciones,",");
@@ -141,7 +155,7 @@ int main(int argc, char** argv){
         strcat(instrucciones,",");
         strcat(instrucciones,nlineasporProcesos);
         strcat(instrucciones,",");
-
+        //Se crea un proceso
         pid = fork();
         if (pid == 0){
             //Soy el hijo
@@ -182,12 +196,15 @@ int main(int argc, char** argv){
         }
         lineaInicia+= lineasporProcesos;
     }
-    //wait procesos y juntar formato rp_cadena_PID.txt y cantidad de procesos
+    //Esperar procesos, asi juntar los archivos con formato rp_cadena_PID.txt
+    //Almacenar los nombres de los resultados parciales creados, (son tantos procesos se hayan creado)
     char lineasRp[1024];
     archivoRp=fopen("nombresRp.txt","r");
     fgets(lineasRp,1024,archivoRp);
     fclose(archivoRp);
+    //----------------------------------------------------------------------------------------------------------- En que se usa esta variable????!!!!
     char lineasMostrar[1024];
+    //Aviso de detección de bandera
     if (flag == 1){
         printf("\nSE INGRESO BANDERA -d, LOS RESULTADOS SON:\n");
     }
@@ -195,17 +212,17 @@ int main(int argc, char** argv){
     if (bandera == 1){
         numeroProcesos = controlAcceso2;
     }
+    //Agregar contenido al archivo final, juntando todos los resultados parciales
     for (int i = 0; i < numeroProcesos; i++){
         archivoFinal=fopen(nombreArchivoFinal,"a");
         archivoRp=fopen(nombre,"r");
-
         char data1;
         while((data1 = fgetc(archivoRp)) != EOF){
             fputc(data1, archivoFinal);
         }
         fclose(archivoRp);
         fclose(archivoFinal);
-
+        //Imprimir el archivo parcial si hay flag -d 
         if (flag == 1){
             archivoRp=fopen(nombre,"r");
             printf("\n%s\n",nombre);
@@ -216,6 +233,7 @@ int main(int argc, char** argv){
         }
         nombre = strtok(NULL,",");
     }
+    //Imprimir el archivo final si hay flag -d
     if (flag == 1){
         char data2;
         printf("\n%s\n",nombreArchivoFinal);
