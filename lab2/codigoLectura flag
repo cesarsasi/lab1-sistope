@@ -4,7 +4,7 @@ char* archivoImagen,*archivoHistograma;
 int flag;
 char *mflag;
 int c;
-while (( (c = getopt(argc, argv, "i:n:c:p:d")) != -1)){
+while (( (c = getopt(argc, argv, "i:o:L:B:d")) != -1)){
     switch (c)
     {
     case 'i':
@@ -27,7 +27,7 @@ while (( (c = getopt(argc, argv, "i:n:c:p:d")) != -1)){
 			archivoHistograma = optarg;
 		}
     	break;
-	case 'c':
+	case 'L':
 		//
 		mflag = optarg; 
         if(optarg == 0){
@@ -37,7 +37,7 @@ while (( (c = getopt(argc, argv, "i:n:c:p:d")) != -1)){
 			niveles = atof(optarg);
 		}
     	break;			
-    case 'p':
+    case 'B':
 		//
 		if(optarg == 0){
 			printf("\nIngreso de parametro B incorrecto!\n");
