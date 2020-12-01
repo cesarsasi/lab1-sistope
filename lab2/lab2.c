@@ -26,34 +26,41 @@ typedef struct bmpInfoHeader
   unsigned int imxtcolors;      /* Colores importantes. 0 si son todos */
 } bmpInfoHeader;
 
-unsigned char *LoadBMP(char *filename, bmpInfoHeader *bInfoHeader);
+
+typedef struct IMAGErgb{                                                                                                                                                                                                                             
+    unsigned char  r;                                                                                                                                                                                                                        
+    unsigned char  g;                                                                                                                                                                                                                        
+    unsigned char  b;                                                                                                                                                                                                                        
+} IMAGErgb;
+
+IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader);
 void DisplayInfo(bmpInfoHeader *info);
-void TextDisplay(bmpInfoHeader *info, unsigned char *img);
+//void TextDisplay(bmpInfoHeader *info, unsigned char *img);
 
 int main()
 {
   bmpInfoHeader info;
-  unsigned char *img;
+  IMAGErgb **img;
 
   img=LoadBMP("imagen_1.bmp", &info);
   DisplayInfo(&info);
-  TextDisplay(&info, img);
+  //TextDisplay(&info, img);
 
   return 0;
 }
 
-void TextDisplay(bmpInfoHeader *info, unsigned char *img)
+/*void TextDisplay(bmpInfoHeader *info, unsigned char *img)
 {
   int x, y;
-  /* Reducimos la resolución vertical y horizontal para que la imagen entre en pantalla */
+  /* Reducimos la resolución vertical y horizontal para que la imagen entre en pantalla 
   static const int reduccionX=6, reduccionY=4;
-  /* Si la componente supera el umbral, el color se marcará como 1. */
+  /* Si la componente supera el umbral, el color se marcará como 1. 
   static const int umbral=90;
-  /* Asignamos caracteres a los colores en pantalla */
+  /* Asignamos caracteres a los colores en pantalla 
   static unsigned char colores[9]=" bgfrRGB";
   int r,g,b;
 
-  /* Dibujamos la imagen */
+  /* Dibujamos la imagen 
   for (y=info->height; y>0; y-=reduccionY)
     {
       for (x=0; x<info->width; x+=reduccionX)
@@ -66,14 +73,14 @@ void TextDisplay(bmpInfoHeader *info, unsigned char *img)
     }
       printf("\n");
     }
-}
+}*/
 
-unsigned char *LoadBMP(char *filename, bmpInfoHeader *bInfoHeader)
+IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader)
 {
 
   FILE *f;
   bmpFileHeader header;     /* cabecera */
-  unsigned char *imgdata;   /* datos de imagen */
+  //unsigned char *imgdata;   /* datos de imagen */
   uint16_t type;        /* 2 bytes identificativos */
 
   f=fopen (filename, "r");
@@ -93,21 +100,30 @@ unsigned char *LoadBMP(char *filename, bmpInfoHeader *bInfoHeader)
 
   /* Leemos la cabecera de información completa */
   fread(bInfoHeader, sizeof(bmpInfoHeader), 1, f);
-
-  /* Reservamos memoria para la imagen, ¿cuánta?
-     Tanto como indique imgsize */
-  imgdata=(unsigned char*)malloc(bInfoHeader->imgsize);
-
   /* Nos situamos en el sitio donde empiezan los datos de imagen,
    nos lo indica el offset de la cabecera de fichero*/
   fseek(f, header.offset, SEEK_SET);
 
-  /* Leemos los datos de imagen, tantos bytes como imgsize */
-  fread(imgdata, bInfoHeader->imgsize,1, f);
+  /* Reservamos memoria para la imagen, ¿cuánta?
+     Tanto como indique imgsize */
+  IMAGErgb **imgdata=(IMAGErgb**)malloc(sizeof(IMAGErgb*)*bInfoHeader->height);
 
+  for(int i=0; i< bInfoHeader->height;i++){
+    imgdata[i]= (IMAGErgb*)malloc(sizeof(IMAGErgb)*bInfoHeader->width);    
+  }
+  for(size_t i=0;i<bInfoHeader->height;i++){
+    for(size_t j=0; j<bInfoHeader->width;j++){
+      fread(&imgdata[i][j],1,sizeof(IMAGErgb),f);
+    }
+  }
   /* Cerramos */
   fclose(f);
 
+  for(size_t i=0;i<bInfoHeader->height;i++){
+    for(size_t j=0; j<bInfoHeader->width;j++){
+      printf("[%d %d %d] ",imgdata[i][j].r,imgdata[i][j].g,imgdata[i][j].b);
+    }
+  }
   /* Devolvemos la imagen */
   return imgdata;
 }
