@@ -3,6 +3,10 @@
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
+int heightOriginal = 0;
+int widthOriginal = 0;
+int bins = 0;
+int rangoBins = 0;
 
 typedef struct bmpFileHeader
 {
@@ -36,7 +40,8 @@ typedef struct IMAGErgb{
 } IMAGErgb;
 
 typedef struct cuadrante{  
-    IMAGErgb ** cuadrantePrincipal;  
+    IMAGErgb ** cuadrantePrincipal;
+    int * histograma;  
     int lvl; 
     int height;
     int width;                                                                                                                                                                                                                       
@@ -45,11 +50,191 @@ typedef struct cuadrante{
     struct cuadrante * subCuadrante3;
     struct cuadrante * subCuadrante4;                                                                                                                                                                                                                        
 } cuadrante;
+
+void calcularHistograma();
+IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader);
+void DisplayInfo(bmpInfoHeader *info);
+void asignarImgSubCuadrantes(cuadrante * structPadre);
+//void TextDisplay(bmpInfoHeader *info, unsigned char *img);
+
+
+//./lab2 -i imagen_1.bmp -o histograma.txt -L 4 -B 6
+int main(int argc, char** argv){
+  int niveles,numerodeBins;
+  char* archivoImagen,*archivoHistograma;
+  int flag;
+  char *mflag;
+  int c;
+  while (( (c = getopt(argc, argv, "i:o:L:B:d")) != -1)){
+      switch (c)
+      {
+      case 'i':
+      //
+          mflag = optarg; 
+      if(optarg == 0){
+        printf("\nIngreso de parametro i incorrecto! \n");
+              exit(EXIT_FAILURE);
+      }else{
+        archivoImagen = optarg;
+      }
+        break;
+      case 'o':
+      //
+          mflag = optarg; 
+          if(optarg == 0){
+        printf("\nIngreso de parametro o incorrecto!\n");
+              exit(EXIT_FAILURE);
+      }else{
+        archivoHistograma = optarg;
+      }
+        break;
+    case 'L':
+      //
+      mflag = optarg; 
+          if(optarg == 0){
+        printf("\nIngreso de parametro L incorrecto!\n");
+              exit(EXIT_FAILURE);
+      }else{
+        niveles = atof(optarg);
+      }
+        break;      
+      case 'B':
+      //
+      if(optarg == 0){
+        printf("\nIngreso de parametro B incorrecto!\n");
+              exit(EXIT_FAILURE);
+      }else{
+        numerodeBins = atof(optarg);
+      }
+        break;
+      case 'd':
+      flag = 1;
+      break;
+      }
+  }
+
+  bmpInfoHeader info;
+  IMAGErgb **img;
+
+  
+  img=LoadBMP(archivoImagen, &info);
+  DisplayInfo(&info);
+  bins = numerodeBins;
+  rangoBins = 255/numerodeBins;
+
+  //Creamos Struct nivel 0
+  cuadrante * cuadrantePadre = (cuadrante*)malloc(sizeof(cuadrante)*1);
+  int * histograma = (int*)malloc(sizeof(int)*numerodeBins);
+  cuadrantePadre->cuadrantePrincipal = img;
+  cuadrantePadre->height=heightOriginal;
+  cuadrantePadre->width=widthOriginal;
+  cuadrantePadre->lvl= 0;
+  cuadrantePadre->histograma = histograma;
+  calcularHistograma(cuadrantePadre);
+  //TextDisplay(&info, img);
+
+  return 0;
+}
+
+/*void TextDisplay(bmpInfoHeader *info, unsigned char *img)
+{
+  int x, y;
+  /* Reducimos la resolución vertical y horizontal para que la imagen entre en pantalla 
+  static const int reduccionX=6, reduccionY=4;
+  /* Si la componente supera el umbral, el color se marcará como 1. 
+  static const int umbral=90;
+  /* Asignamos caracteres a los colores en pantalla 
+  static unsigned char colores[9]=" bgfrRGB";
+  int r,g,b;
+
+  /* Dibujamos la imagen 
+  for (y=info->height; y>0; y-=reduccionY)
+    {
+      for (x=0; x<info->width; x+=reduccionX)
+    {
+      b=(img[3*(x+y*info->width)]>umbral);
+      g=(img[3*(x+y*info->width)+1]>umbral);
+      r=(img[3*(x+y*info->width)+2]>umbral);
+
+      printf("%c", colores[b+g*2+r*4]);
+    }
+      printf("\n");
+    }
+}*/
+
+IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader)
+{
+
+  FILE *f;
+  bmpFileHeader header;     /* cabecera */
+  //unsigned char *imgdata;   /* datos de imagen */
+  uint16_t type;        /* 2 bytes identificativos */
+
+  f=fopen (filename, "r");
+  if (!f)
+    return NULL;        /* Si no podemos leer, no hay imagen*/
+
+  /* Leemos los dos primeros bytes */
+  fread(&type, sizeof(uint16_t), 1, f);
+  if (type !=0x4D42)        /* Comprobamos el formato */
+    {
+      fclose(f);
+      return NULL;
+    }
+
+  /* Leemos la cabecera de fichero completa */
+  fread(&header, sizeof(bmpFileHeader), 1, f);
+
+  /* Leemos la cabecera de información completa */
+  fread(bInfoHeader, sizeof(bmpInfoHeader), 1, f);
+  /* Nos situamos en el sitio donde empiezan los datos de imagen,
+   nos lo indica el offset de la cabecera de fichero*/
+  fseek(f, header.offset, SEEK_SET);
+
+  /* Reservamos memoria para la imagen, ¿cuánta?
+     Tanto como indique imgsize */
+  IMAGErgb **imgdata=(IMAGErgb**)malloc(sizeof(IMAGErgb*)*bInfoHeader->height);
+  heightOriginal=bInfoHeader->height;
+  widthOriginal=bInfoHeader->width;
+  for(int i=0; i< bInfoHeader->height;i++){
+    imgdata[i]= (IMAGErgb*)malloc(sizeof(IMAGErgb)*bInfoHeader->width);    
+  }
+  for(size_t i=0;i<bInfoHeader->height;i++){
+    for(size_t j=0; j<bInfoHeader->width;j++){
+      fread(&imgdata[i][j],1,sizeof(IMAGErgb),f);
+    }
+  }
+  /* Cerramos */
+  fclose(f);
+  /*Print Matriz
+  for(size_t i=0;i<bInfoHeader->height;i++){
+    for(size_t j=0; j<bInfoHeader->width;j++){
+      printf("[%d %d %d] ",imgdata[i][j].r,imgdata[i][j].g,imgdata[i][j].b);
+    }
+  }*/
+  /* Devolvemos la imagen */
+  return imgdata;
+}
+
+void DisplayInfo(bmpInfoHeader *info)
+{
+  printf("Tamaño de la cabecera: %u\n", info->headersize);
+  printf("Anchura: %d\n", info->width);
+  printf("Altura: %d\n", info->height);
+  printf("Planos (1): %d\n", info->planes);
+  printf("Bits por pixel: %d\n", info->bpp);
+  printf("Compresión: %d\n", info->compress);
+  printf("Tamaño de datos de imagen: %u\n", info->imgsize);
+  printf("Resolucón horizontal: %u\n", info->bpmx);
+  printf("Resolucón vertical: %u\n", info->bpmy);
+  printf("Colores en paleta: %d\n", info->colors);
+  printf("Colores importantes: %d\n", info->imxtcolors);
+}
+
 /*
 [structPadre]                                                             lvl0 por hebra  el padre espere al hijo
 [[hijo] [hijo] [hijo] [hijo] ]    lvl1
 */
-
 void asignarImgSubCuadrantes(cuadrante * structPadre){  
   int height= structPadre->height;
   int width = structPadre->width;
@@ -139,7 +324,7 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
   structPadre->subCuadrante3 = subcuadrante3;
 
   //Matriz cuarto subcuadrante
-  IMAGErgb **imgsubcuadrant4=(IMAGErgb**)malloc(sizeof(IMAGErgb*)*(height/2));
+  IMAGErgb **imgsubcuadrante4=(IMAGErgb**)malloc(sizeof(IMAGErgb*)*(height/2));
   for(int i=0; i< (height/2);i++){
     imgsubcuadrante4[i]= (IMAGErgb*)malloc(sizeof(IMAGErgb)*(width/2));    
   }
@@ -165,8 +350,6 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
   subcuadrante4->subCuadrante3 = NULL;
   subcuadrante4->subCuadrante4 = NULL;
   structPadre->subCuadrante4 = subcuadrante4;
-
-
 /*
 0     w/2      w
 1        2
@@ -182,165 +365,30 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
 3        4                                              */
 };
 
-
-IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader);
-void DisplayInfo(bmpInfoHeader *info);
-//void TextDisplay(bmpInfoHeader *info, unsigned char *img);
-//./lab2 -i imagen_1.bmp -o histograma.txt -L 4 -B 6
-int main(int argc, char** argv){
-  int niveles,numerodeBins;
-  char* archivoImagen,*archivoHistograma;
-  int flag;
-  char *mflag;
-  int c;
-  while (( (c = getopt(argc, argv, "i:o:L:B:d")) != -1)){
-      switch (c)
-      {
-      case 'i':
-      //
-          mflag = optarg; 
-      if(optarg == 0){
-        printf("\nIngreso de parametro i incorrecto! \n");
-              exit(EXIT_FAILURE);
-      }else{
-        archivoImagen = optarg;
-      }
-        break;
-      case 'o':
-      //
-          mflag = optarg; 
-          if(optarg == 0){
-        printf("\nIngreso de parametro o incorrecto!\n");
-              exit(EXIT_FAILURE);
-      }else{
-        archivoHistograma = optarg;
-      }
-        break;
-    case 'L':
-      //
-      mflag = optarg; 
-          if(optarg == 0){
-        printf("\nIngreso de parametro L incorrecto!\n");
-              exit(EXIT_FAILURE);
-      }else{
-        niveles = atof(optarg);
-      }
-        break;      
-      case 'B':
-      //
-      if(optarg == 0){
-        printf("\nIngreso de parametro B incorrecto!\n");
-              exit(EXIT_FAILURE);
-      }else{
-        numerodeBins = atof(optarg);
-      }
-        break;
-      case 'd':
-      flag = 1;
-      break;
-      }
-  }
-
-  bmpInfoHeader info;
-  IMAGErgb **img;
-
-  img=LoadBMP(archivoImagen, &info);
-  DisplayInfo(&info);
-  //TextDisplay(&info, img);
-
-  return 0;
-}
-
-/*void TextDisplay(bmpInfoHeader *info, unsigned char *img)
-{
-  int x, y;
-  /* Reducimos la resolución vertical y horizontal para que la imagen entre en pantalla 
-  static const int reduccionX=6, reduccionY=4;
-  /* Si la componente supera el umbral, el color se marcará como 1. 
-  static const int umbral=90;
-  /* Asignamos caracteres a los colores en pantalla 
-  static unsigned char colores[9]=" bgfrRGB";
-  int r,g,b;
-
-  /* Dibujamos la imagen 
-  for (y=info->height; y>0; y-=reduccionY)
-    {
-      for (x=0; x<info->width; x+=reduccionX)
-    {
-      b=(img[3*(x+y*info->width)]>umbral);
-      g=(img[3*(x+y*info->width)+1]>umbral);
-      r=(img[3*(x+y*info->width)+2]>umbral);
-
-      printf("%c", colores[b+g*2+r*4]);
-    }
-      printf("\n");
-    }
-}*/
-
-IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader)
-{
-
-  FILE *f;
-  bmpFileHeader header;     /* cabecera */
-  //unsigned char *imgdata;   /* datos de imagen */
-  uint16_t type;        /* 2 bytes identificativos */
-
-  f=fopen (filename, "r");
-  if (!f)
-    return NULL;        /* Si no podemos leer, no hay imagen*/
-
-  /* Leemos los dos primeros bytes */
-  fread(&type, sizeof(uint16_t), 1, f);
-  if (type !=0x4D42)        /* Comprobamos el formato */
-    {
-      fclose(f);
-      return NULL;
-    }
-
-  /* Leemos la cabecera de fichero completa */
-  fread(&header, sizeof(bmpFileHeader), 1, f);
-
-  /* Leemos la cabecera de información completa */
-  fread(bInfoHeader, sizeof(bmpInfoHeader), 1, f);
-  /* Nos situamos en el sitio donde empiezan los datos de imagen,
-   nos lo indica el offset de la cabecera de fichero*/
-  fseek(f, header.offset, SEEK_SET);
-
-  /* Reservamos memoria para la imagen, ¿cuánta?
-     Tanto como indique imgsize */
-  IMAGErgb **imgdata=(IMAGErgb**)malloc(sizeof(IMAGErgb*)*bInfoHeader->height);
-
-  for(int i=0; i< bInfoHeader->height;i++){
-    imgdata[i]= (IMAGErgb*)malloc(sizeof(IMAGErgb)*bInfoHeader->width);    
-  }
-  for(size_t i=0;i<bInfoHeader->height;i++){
-    for(size_t j=0; j<bInfoHeader->width;j++){
-      fread(&imgdata[i][j],1,sizeof(IMAGErgb),f);
-    }
-  }
-  /* Cerramos */
-  fclose(f);
-  /*Print Matriz
-  for(size_t i=0;i<bInfoHeader->height;i++){
-    for(size_t j=0; j<bInfoHeader->width;j++){
-      printf("[%d %d %d] ",imgdata[i][j].r,imgdata[i][j].g,imgdata[i][j].b);
+void calcularHistograma(cuadrante * structPadre){
+  //Print para pasar la imagen de prueba
+  /*for(size_t i=0;i<structPadre->height;i++){
+    for(size_t j=0; j<structPadre->width;j++){
+      printf("[%d %d %d] ",structPadre->cuadrantePrincipal[i][j].r,structPadre->cuadrantePrincipal[i][j].g,structPadre->cuadrantePrincipal[i][j].b);
     }
   }*/
-  /* Devolvemos la imagen */
-  return imgdata;
-}
 
-void DisplayInfo(bmpInfoHeader *info)
-{
-  printf("Tamaño de la cabecera: %u\n", info->headersize);
-  printf("Anchura: %d\n", info->width);
-  printf("Altura: %d\n", info->height);
-  printf("Planos (1): %d\n", info->planes);
-  printf("Bits por pixel: %d\n", info->bpp);
-  printf("Compresión: %d\n", info->compress);
-  printf("Tamaño de datos de imagen: %u\n", info->imgsize);
-  printf("Resolucón horizontal: %u\n", info->bpmx);
-  printf("Resolucón vertical: %u\n", info->bpmy);
-  printf("Colores en paleta: %d\n", info->colors);
-  printf("Colores importantes: %d\n", info->imxtcolors);
+  for(size_t i=0;i<structPadre->height;i++){
+    for(size_t j=0; j<structPadre->width;j++){
+      //Convertir rgb a gris
+      int valorGris = structPadre->cuadrantePrincipal[i][j].r * 0.3 + structPadre->cuadrantePrincipal[i][j].g * 0.59 + structPadre->cuadrantePrincipal[i][j].b * 0.11;
+      //Sumar al contador de la seccion del histograma a la que corresponde
+      int posicionHistograma = valorGris/rangoBins;
+      structPadre->histograma[posicionHistograma] +=1;
+      //printf("[%d %d %d] ",structPadre->cuadrantePrincipal[i][j].r,structPadre->cuadrantePrincipal[i][j].g,structPadre->cuadrantePrincipal[i][j].b);
+    }
+  }
+  //PrintearHistograma
+  printf("\n---------------HISTOGRAMA---------------\n");
+  for (int i = 0; i < bins; ++i)
+  {
+    printf("[%d] ",structPadre->histograma[i]);
+  }
+
+
 }
