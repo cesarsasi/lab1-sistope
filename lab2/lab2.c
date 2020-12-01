@@ -3,9 +3,10 @@
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
+#include <math.h>
 int heightOriginal = 0;
 int widthOriginal = 0;
-int bins = 0;
+int bins = 0; //rango
 int rangoBins = 0;
 
 typedef struct bmpFileHeader
@@ -119,12 +120,17 @@ int main(int argc, char** argv){
   
   img=LoadBMP(archivoImagen, &info);
   DisplayInfo(&info);
+
   bins = numerodeBins;
-  rangoBins = 255/numerodeBins;
+
+  rangoBins = 256/numerodeBins;
 
   //Creamos Struct nivel 0
   cuadrante * cuadrantePadre = (cuadrante*)malloc(sizeof(cuadrante)*1);
-  int * histograma = (int*)malloc(sizeof(int)*numerodeBins);
+  int * histograma = (int*)malloc(sizeof(int)*rangoBins);
+  for (int i = 0; i < rangoBins; ++i){
+    histograma[i] = 0;
+  }
   cuadrantePadre->cuadrantePrincipal = img;
   cuadrantePadre->height=heightOriginal;
   cuadrantePadre->width=widthOriginal;
@@ -378,14 +384,14 @@ void calcularHistograma(cuadrante * structPadre){
       //Convertir rgb a gris
       int valorGris = structPadre->cuadrantePrincipal[i][j].r * 0.3 + structPadre->cuadrantePrincipal[i][j].g * 0.59 + structPadre->cuadrantePrincipal[i][j].b * 0.11;
       //Sumar al contador de la seccion del histograma a la que corresponde
-      int posicionHistograma = valorGris/rangoBins;
+      int posicionHistograma = floor(valorGris/bins);
       structPadre->histograma[posicionHistograma] +=1;
       //printf("[%d %d %d] ",structPadre->cuadrantePrincipal[i][j].r,structPadre->cuadrantePrincipal[i][j].g,structPadre->cuadrantePrincipal[i][j].b);
     }
   }
   //PrintearHistograma
   printf("\n---------------HISTOGRAMA---------------\n");
-  for (int i = 0; i < bins; ++i)
+  for (int i = 0; i < rangoBins; ++i)
   {
     printf("[%d] ",structPadre->histograma[i]);
   }
