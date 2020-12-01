@@ -1,3 +1,2 @@
 all:
-	gcc -o coordinador coordinador.c
-	gcc -o comparador comparador.c
+	gcc -o lab2 lab2.c
