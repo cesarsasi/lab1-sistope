@@ -54,36 +54,13 @@ typedef struct cuadrante{
     struct cuadrante * subCuadrante4;                                                                                                                                                                                                                        
 } cuadrante;
 
-void calcularHistograma(cuadrante * structPadre);
+void *crearHebras(void *padre);
 IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader);
 void DisplayInfo(bmpInfoHeader *info);
 void asignarImgSubCuadrantes(cuadrante * structPadre);
+void calcularHistograma(cuadrante * structPadre);
 void sumarHistogramas(cuadrante * structPadre);
-void* crearHebras(void* estructurapadre);
 
-void* crearHebras(void* estructurapadre){
-  printf("--------------------------HOOOLA\n");
-  cuadrante * estructuraPadre = (cuadrante*) estructurapadre;
-  pthread_t hebras[4];
-  if(estructuraPadre->lvl <= ultimoNivel-1){//Recursion 
-    asignarImgSubCuadrantes(estructuraPadre);
-    //Generar hebras para que los hijos en esa hebra ejecute el calculo de sus hijos
-    pthread_create(&hebras[0],NULL, &crearHebras,(void*)(estructuraPadre->subCuadrante1));
-    pthread_create(&hebras[1],NULL, &crearHebras,(void*)(estructuraPadre->subCuadrante2));
-    pthread_create(&hebras[2],NULL, &crearHebras,(void*)(estructuraPadre->subCuadrante3));
-    pthread_create(&hebras[4],NULL, &crearHebras,(void*)(estructuraPadre->subCuadrante4));
-    pthread_join(hebras[0],NULL);
-    pthread_join(hebras[1],NULL);
-    pthread_join(hebras[2],NULL);
-    pthread_join(hebras[3],NULL);
-    //Sumar histogramas de la espera de la hebra
-    sumarHistogramas(estructuraPadre);
-  }else{//Calculamos histograma de la ultima cochinada
-    calcularHistograma(estructuraPadre);//Pasar histograma al nivel que llama a esta recursion
-    pthread_exit(0);
-  }
-  pthread_exit(0);
-}
 
 //./lab2 -i imagen_1.bmp -o histograma.txt -L 4 -B 6
 int main(int argc, char** argv){
@@ -153,30 +130,47 @@ int main(int argc, char** argv){
   DisplayInfo(&info);
 
   //Creamos Struct nivel 0
-  cuadrante * cuadrantePadre = (cuadrante*)malloc(sizeof(cuadrante)*1);
-  int * histograma = (int*)malloc(sizeof(int)*numerodeBins);
-  for (int i = 0; i < numerodeBins; ++i){
-    histograma[i] = 0;
-  }
+  cuadrante * cuadrantePadre = (cuadrante*)calloc(sizeof(cuadrante),1);
+  int *histograma = (int*)calloc(sizeof(int),bins);
+  
   cuadrantePadre->cuadrantePrincipal = img;
   cuadrantePadre->height=heightOriginal;
   cuadrantePadre->width=widthOriginal;
   cuadrantePadre->lvl= 0;
   cuadrantePadre->histograma = histograma;
-  calcularHistograma(cuadrantePadre);
-  
-  pthread_t hebra;
-  pthread_create(&hebra,NULL,crearHebras,NULL);
-  printf("VAMOOCHILE\n");
-  pthread_join(hebra,NULL);
-  
+  //calcularHistograma(cuadrantePadre);
 
+  pthread_t hebra;
+  pthread_create(&hebra, NULL, crearHebras, (void*)cuadrantePadre);
+  pthread_join(hebra,NULL);
+  printf("\n--------------- HISTOGRAMA PADRE ---------------\n");
   for (int i = 0; i < bins; ++i){
-    
     //printf("\n[%d,  %d]",inicioRango,finRango);
     printf("[%d] ",cuadrantePadre->histograma[i]);
   }
+  printf("\n");
   return 0;
+}
+
+void *crearHebras(void *padre){
+  cuadrante * padrecito = (cuadrante *)padre;
+  asignarImgSubCuadrantes(padrecito);
+  pthread_t hebras[4];
+  if(padrecito->lvl < ultimoNivel){
+    pthread_create(&hebras[0],NULL, crearHebras,(void*)padrecito->subCuadrante1);
+    pthread_create(&hebras[1],NULL, crearHebras,(void*)padrecito->subCuadrante2);
+    pthread_create(&hebras[2],NULL, crearHebras,(void*)padrecito->subCuadrante3);
+    pthread_create(&hebras[4],NULL, crearHebras,(void*)padrecito->subCuadrante4);
+    pthread_join(hebras[0],NULL);
+    pthread_join(hebras[1],NULL);
+    pthread_join(hebras[2],NULL);
+    pthread_join(hebras[3],NULL);
+    sumarHistogramas(padrecito);
+  }else{
+    calcularHistograma(padrecito);
+    pthread_exit(NULL);
+  }
+  pthread_exit(NULL);
 }
 
 //Guarda la imagen en el puntero asociado
@@ -185,35 +179,28 @@ IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader){
   bmpFileHeader header;     /* cabecera */
   //unsigned char *imgdata;   /* datos de imagen */
   uint16_t type;        /* 2 bytes identificativos */
-
-  f=fopen (filename, "r");
+  f=fopen (filename, "rb");
   if (!f)
     return NULL;        /* Si no podemos leer, no hay imagen*/
-
   /* Leemos los dos primeros bytes */
   fread(&type, sizeof(uint16_t), 1, f);
-  if (type !=0x4D42)        /* Comprobamos el formato */
-    {
+  if (type !=0x4D42){   /* Comprobamos el formato */
       fclose(f);
       return NULL;
     }
-
   /* Leemos la cabecera de fichero completa */
   fread(&header, sizeof(bmpFileHeader), 1, f);
-
   /* Leemos la cabecera de información completa */
   fread(bInfoHeader, sizeof(bmpInfoHeader), 1, f);
   /* Nos situamos en el sitio donde empiezan los datos de imagen,
    nos lo indica el offset de la cabecera de fichero*/
   fseek(f, header.offset, SEEK_SET);
-
-  /* Reservamos memoria para la imagen, ¿cuánta?
-     Tanto como indique imgsize */
-  IMAGErgb **imgdata=(IMAGErgb**)malloc(sizeof(IMAGErgb*)*bInfoHeader->height);
+  /* Reservamos memoria para la imagen, ¿cuánta? Tanto como indique imgsize */
+  IMAGErgb **imgdata=(IMAGErgb**)calloc(sizeof(IMAGErgb*),bInfoHeader->height);
   heightOriginal=bInfoHeader->height;
   widthOriginal=bInfoHeader->width;
   for(int i=0; i< bInfoHeader->height;i++){
-    imgdata[i]= (IMAGErgb*)malloc(sizeof(IMAGErgb)*bInfoHeader->width);    
+    imgdata[i]= (IMAGErgb*)calloc(sizeof(IMAGErgb),bInfoHeader->width);    
   }
   for(size_t i=0;i<bInfoHeader->height;i++){
     for(size_t j=0; j<bInfoHeader->width;j++){
@@ -222,12 +209,6 @@ IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader){
   }
   /* Cerramos */
   fclose(f);
-  /*Print Matriz
-  for(size_t i=0;i<bInfoHeader->height;i++){
-    for(size_t j=0; j<bInfoHeader->width;j++){
-      printf("[%d %d %d] ",imgdata[i][j].r,imgdata[i][j].g,imgdata[i][j].b);
-    }
-  }*/
   /* Devolvemos la imagen */
   return imgdata;
 }
@@ -265,29 +246,26 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
   int height= structPadre->height;
   int width = structPadre->width;
   int lvlPadre = structPadre->lvl;
-  //Matriz Primer subcuadrante
-  IMAGErgb **imgsubcuadrante1=(IMAGErgb**)malloc(sizeof(IMAGErgb*)*(height/2));
+  
+  //Asignamos memoria a el subcuadrante
+  IMAGErgb **imgsubcuadrante1=(IMAGErgb**)calloc(sizeof(IMAGErgb*),(height/2));
   for(int i=0; i< (height/2);i++){
-    imgsubcuadrante1[i]= (IMAGErgb*)malloc(sizeof(IMAGErgb)*(width/2));    
+    imgsubcuadrante1[i]= (IMAGErgb*)calloc(sizeof(IMAGErgb),(width/2));    
   }
+  //Poblamos el subcuadrante
   int h1 = 0, w1 = 0;
   for(int i = 0; i<height/2; i++ ){
     for(int j = 0; j<width/2; j++){
-      imgsubcuadrante1[h1][w1].r = structPadre->cuadrantePrincipal[i][j].r;
-      imgsubcuadrante1[h1][w1].g = structPadre->cuadrantePrincipal[i][j].g;
-      imgsubcuadrante1[h1][w1].b = structPadre->cuadrantePrincipal[i][j].b;
-      w1++;
+      imgsubcuadrante1[i][j].r = structPadre->cuadrantePrincipal[i][j].r;
+      imgsubcuadrante1[i][j].g = structPadre->cuadrantePrincipal[i][j].g;
+      imgsubcuadrante1[i][j].b = structPadre->cuadrantePrincipal[i][j].b;
     }
-    w1=0;
-    h1++;
   }
   //Apuntar esta matriz al subcuandrante del padre correspondiente
-  cuadrante * subcuadrante = (cuadrante*)malloc(sizeof(cuadrante)*1);
+  cuadrante * subcuadrante = (cuadrante*)calloc(sizeof(cuadrante),1);
   subcuadrante->cuadrantePrincipal = imgsubcuadrante1;
-  subcuadrante->histograma = (int*)malloc(sizeof(int)*bins);
-  for (int i = 0; i < bins; ++i){
-    subcuadrante->histograma[i] = 0;
-  }
+  int *histograma1 = (int*)calloc(sizeof(int),bins);
+  subcuadrante->histograma = histograma1;
   subcuadrante->height = height/2;
   subcuadrante->width = width/2;
   subcuadrante->lvl = lvlPadre +1;
@@ -297,12 +275,12 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
   subcuadrante->subCuadrante4 = NULL;
   structPadre->subCuadrante1 = subcuadrante;
 
-  //Matriz segundo subcuadrante
-  IMAGErgb **imgsubcuadrante2=(IMAGErgb**)malloc(sizeof(IMAGErgb*)*(height/2));
+  //Asignamos memoria a el subcuadrante
+  IMAGErgb **imgsubcuadrante2=(IMAGErgb**)calloc(sizeof(IMAGErgb*),(height/2));
   for(int i=0; i< (height/2);i++){
-    imgsubcuadrante2[i]= (IMAGErgb*)malloc(sizeof(IMAGErgb)*(width/2));    
+    imgsubcuadrante2[i]= (IMAGErgb*)calloc(sizeof(IMAGErgb),(width/2));    
   }
-  int h2 = 0, w2 = width/2;
+  int h2 = 0, w2 = 0;
   for(int i = 0; i<height/2; i++ ){
     for(int j = width/2; j<width; j++){
       imgsubcuadrante2[h2][w2].r = structPadre->cuadrantePrincipal[i][j].r;
@@ -314,12 +292,10 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
     h2++;
   }
   //Apuntar esta matriz al subcuandrante del padre correspondiente
-  cuadrante * subcuadrante2 = (cuadrante*)malloc(sizeof(cuadrante)*1);
+  cuadrante * subcuadrante2 = (cuadrante*)calloc(sizeof(cuadrante),1);
   subcuadrante2->cuadrantePrincipal = imgsubcuadrante2;
-  subcuadrante2->histograma = (int*)malloc(sizeof(int)*bins);
-  for (int i = 0; i < bins; ++i){
-    subcuadrante2->histograma[i] = 0;
-  }
+  int *histograma2 = (int*)calloc(sizeof(int),bins);
+  subcuadrante2->histograma = histograma2;
   subcuadrante2->height = height/2;
   subcuadrante2->width = width/2;
   subcuadrante2->lvl = lvlPadre +1;
@@ -329,12 +305,13 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
   subcuadrante2->subCuadrante4 = NULL;
   structPadre->subCuadrante2 = subcuadrante2;
 
-  //Matriz tercer subcuadrante
-  IMAGErgb **imgsubcuadrante3=(IMAGErgb**)malloc(sizeof(IMAGErgb*)*(height/2));
+  //Asignamos memoria a el subcuadrante
+  IMAGErgb **imgsubcuadrante3=(IMAGErgb**)calloc(sizeof(IMAGErgb*),(height/2));
   for(int i=0; i< (height/2);i++){
-    imgsubcuadrante3[i]= (IMAGErgb*)malloc(sizeof(IMAGErgb)*(width/2));    
+    imgsubcuadrante3[i]= (IMAGErgb*)calloc(sizeof(IMAGErgb),(width/2));    
   }
-  int h3 = height/2, w3 = 0;
+
+  int h3 = 0, w3 = 0;
   for(int i = height/2; i<height; i++ ){
     for(int j = 0; j<width/2; j++){
       imgsubcuadrante3[h3][w3].r = structPadre->cuadrantePrincipal[i][j].r;
@@ -345,13 +322,12 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
     w3=0;
     h3++;
   }
+
   //Apuntar esta matriz al subcuandrante del padre correspondiente
-  cuadrante * subcuadrante3 = (cuadrante*)malloc(sizeof(cuadrante)*1);
+  cuadrante * subcuadrante3 = (cuadrante*)calloc(sizeof(cuadrante),1);
   subcuadrante3->cuadrantePrincipal = imgsubcuadrante3;
-  subcuadrante3->histograma = (int*)malloc(sizeof(int)*bins);
-  for (int i = 0; i < bins; ++i){
-    subcuadrante3->histograma[i] = 0;
-  }
+  int *histograma3 = (int*)calloc(sizeof(int),bins);
+  subcuadrante3->histograma = histograma3;
   subcuadrante3->height = height/2;
   subcuadrante3->width = width/2;
   subcuadrante3->lvl = lvlPadre +1;
@@ -361,12 +337,13 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
   subcuadrante3->subCuadrante4 = NULL;
   structPadre->subCuadrante3 = subcuadrante3;
 
-  //Matriz cuarto subcuadrante
-  IMAGErgb **imgsubcuadrante4=(IMAGErgb**)malloc(sizeof(IMAGErgb*)*(height/2));
+  
+  //Asignamos memoria a el subcuadrante
+  IMAGErgb **imgsubcuadrante4=(IMAGErgb**)calloc(sizeof(IMAGErgb*),(height/2));
   for(int i=0; i< (height/2);i++){
-    imgsubcuadrante4[i]= (IMAGErgb*)malloc(sizeof(IMAGErgb)*(width/2));    
+    imgsubcuadrante4[i]= (IMAGErgb*)calloc(sizeof(IMAGErgb),(width/2));    
   }
-  int h4 = height/2, w4 = width/2;
+  int h4 = 0, w4 = 0;
   for(int i = height/2; i<height; i++ ){
     for(int j = width/2; j<width; j++){
       imgsubcuadrante4[h4][w4].r = structPadre->cuadrantePrincipal[i][j].r;
@@ -377,13 +354,12 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
     w4=0;
     h4++;
   }
+
   //Apuntar esta matriz al subcuandrante del padre correspondiente
-  cuadrante * subcuadrante4 = (cuadrante*)malloc(sizeof(cuadrante)*1);
+  cuadrante * subcuadrante4 = (cuadrante*)calloc(sizeof(cuadrante),1);
   subcuadrante4->cuadrantePrincipal = imgsubcuadrante4;
-  subcuadrante4->histograma = (int*)malloc(sizeof(int)*bins);
-  for (int i = 0; i < bins; ++i){
-    subcuadrante4->histograma[i] = 0;
-  }
+  int *histograma4 = (int*)calloc(sizeof(int),bins);
+  subcuadrante4->histograma = histograma4;
   subcuadrante4->height = height/2;
   subcuadrante4->width = width/2;
   subcuadrante4->lvl = lvlPadre +1;
@@ -392,13 +368,14 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
   subcuadrante4->subCuadrante3 = NULL;
   subcuadrante4->subCuadrante4 = NULL;
   structPadre->subCuadrante4 = subcuadrante4;
+
 };
 
 //Calcular histograma de x struct Cuadrante
-void calcularHistograma(cuadrante * structPadre){
+void calcularHistograma(cuadrante *structPadre){
   //Proceso calcular histograma
-  for(size_t i=0;i<structPadre->height;i++){
-    for(size_t j=0; j<structPadre->width;j++){
+  for(int i=0;i<structPadre->height;i++){
+    for(int j=0; j<structPadre->width;j++){
       //Convertir rgb a gris
       int valorGris = structPadre->cuadrantePrincipal[i][j].r * 0.3 + structPadre->cuadrantePrincipal[i][j].g * 0.59 + structPadre->cuadrantePrincipal[i][j].b * 0.11;
       //Sumar al contador de la seccion del histograma a la que corresponde
@@ -407,15 +384,14 @@ void calcularHistograma(cuadrante * structPadre){
       //printf("[%d %d %d] ",structPadre->cuadrantePrincipal[i][j].r,structPadre->cuadrantePrincipal[i][j].g,structPadre->cuadrantePrincipal[i][j].b);
     }
   }
+
   //PrintearHistograma
-  printf("\n---------------HISTOGRAMA---------------\n");
-  //inicioRango = 0;
-  //finRango = 0;
+  printf("\n--------------- HISTOGRAMA HEBRA ---------------\n");
   for (int i = 0; i < bins; ++i){
     //printf("\n[%d,  %d]",inicioRango,finRango);
     printf("[%d] ",structPadre->histograma[i]);
   }
-  /*
+  /* Logica Histograma
   [ 0, 31]  0    [x,x,x,x,x,x,x,x]
   [32, 63]  1
   [64, 95]  2

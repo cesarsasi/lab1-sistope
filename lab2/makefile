@@ -1,2 +1,3 @@
 all:
-	gcc -o lab2 lab2.c -pthread
+	gcc lab2.c -o lab2 -lm -lpthread
+	gcc hist.c -o lab -lm -lpthread
