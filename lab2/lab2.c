@@ -4,35 +4,37 @@
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
+#include <pthread.h>
+
 int heightOriginal = 0;
 int widthOriginal = 0;
 int bins = 0; //rango
 int rangoBins = 0;
+int ultimoNivel= 0;
 
 typedef struct bmpFileHeader
 {
   /* 2 bytes de identificación */
   unsigned int size;        /* Tamaño del archivo */
-  uint16_t resv1;       /* Reservado */
-  uint16_t resv2;       /* Reservado */
+  uint16_t resv1;           /* Reservado */
+  uint16_t resv2;           /* Reservado */
   unsigned int offset;      /* Offset hasta hasta los datos de imagen */
 } bmpFileHeader;
 
 typedef struct bmpInfoHeader
 {
-  unsigned int headersize;      /* Tamaño de la cabecera */
-  int width;       /* Ancho */
-  int height;      /* Alto */
+  unsigned int headersize;  /* Tamaño de la cabecera       */
+  int width;                /* Ancho                       */
+  int height;               /* Alto                        */
   uint16_t planes;          /* Planos de color (Siempre 1) */
   uint16_t bpp;             /* bits por pixel */
-  unsigned int compress;        /* compresión */
+  unsigned int compress;    /* compresión */
   unsigned int imgsize;     /* tamaño de los datos de imagen */
-  int bpmx;        /* Resolución X en bits por metro */
-  int bpmy;        /* Resolución Y en bits por metro */
+  int bpmx;                 /* Resolución X en bits por metro */
+  int bpmy;                 /* Resolución Y en bits por metro */
   unsigned int colors;      /* colors used en la paleta */
-  unsigned int imxtcolors;      /* Colores importantes. 0 si son todos */
+  unsigned int imxtcolors;  /* Colores importantes. 0 si son todos */
 } bmpInfoHeader;
-
 
 typedef struct IMAGErgb{                                                                                                                                                                                                                             
     unsigned char  r;                                                                                                                                                                                                                        
@@ -52,15 +54,40 @@ typedef struct cuadrante{
     struct cuadrante * subCuadrante4;                                                                                                                                                                                                                        
 } cuadrante;
 
-void calcularHistograma();
+void calcularHistograma(cuadrante * structPadre);
 IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader);
 void DisplayInfo(bmpInfoHeader *info);
 void asignarImgSubCuadrantes(cuadrante * structPadre);
-//void TextDisplay(bmpInfoHeader *info, unsigned char *img);
+void sumarHistogramas(cuadrante * structPadre);
+void* crearHebras(void* estructurapadre);
 
+void* crearHebras(void* estructurapadre){
+  printf("--------------------------HOOOLA\n");
+  cuadrante * estructuraPadre = (cuadrante*) estructurapadre;
+  pthread_t hebras[4];
+  if(estructuraPadre->lvl <= ultimoNivel-1){//Recursion 
+    asignarImgSubCuadrantes(estructuraPadre);
+    //Generar hebras para que los hijos en esa hebra ejecute el calculo de sus hijos
+    pthread_create(&hebras[0],NULL, &crearHebras,(void*)(estructuraPadre->subCuadrante1));
+    pthread_create(&hebras[1],NULL, &crearHebras,(void*)(estructuraPadre->subCuadrante2));
+    pthread_create(&hebras[2],NULL, &crearHebras,(void*)(estructuraPadre->subCuadrante3));
+    pthread_create(&hebras[4],NULL, &crearHebras,(void*)(estructuraPadre->subCuadrante4));
+    pthread_join(hebras[0],NULL);
+    pthread_join(hebras[1],NULL);
+    pthread_join(hebras[2],NULL);
+    pthread_join(hebras[3],NULL);
+    //Sumar histogramas de la espera de la hebra
+    sumarHistogramas(estructuraPadre);
+  }else{//Calculamos histograma de la ultima cochinada
+    calcularHistograma(estructuraPadre);//Pasar histograma al nivel que llama a esta recursion
+    pthread_exit(0);
+  }
+  pthread_exit(0);
+}
 
 //./lab2 -i imagen_1.bmp -o histograma.txt -L 4 -B 6
 int main(int argc, char** argv){
+  
   int niveles,numerodeBins;
   char* archivoImagen,*archivoHistograma;
   int flag;
@@ -89,7 +116,7 @@ int main(int argc, char** argv){
         archivoHistograma = optarg;
       }
         break;
-    case 'L':
+      case 'L':
       //
       mflag = optarg; 
           if(optarg == 0){
@@ -113,17 +140,17 @@ int main(int argc, char** argv){
       break;
       }
   }
-
+  //Dar valor a variables globales
+  ultimoNivel = niveles;       // Nivel maximo
+  bins = numerodeBins;         // Cantidad de intervalos
+  rangoBins = 256/numerodeBins;// Rango
+  //Instanciar header de la imagen y puntero en el que se va a almacenar
   bmpInfoHeader info;
   IMAGErgb **img;
-
-  
+  //Asignamos un puntero a la matriz de la imagen obtenida
   img=LoadBMP(archivoImagen, &info);
+  //Printear info de la imagen
   DisplayInfo(&info);
-
-  bins = numerodeBins;         //Cantidad de intervalos
-
-  rangoBins = 256/numerodeBins;//Rango
 
   //Creamos Struct nivel 0
   cuadrante * cuadrantePadre = (cuadrante*)malloc(sizeof(cuadrante)*1);
@@ -137,40 +164,23 @@ int main(int argc, char** argv){
   cuadrantePadre->lvl= 0;
   cuadrantePadre->histograma = histograma;
   calcularHistograma(cuadrantePadre);
-  //TextDisplay(&info, img);
+  
+  pthread_t hebra;
+  pthread_create(&hebra,NULL,crearHebras,NULL);
+  printf("VAMOOCHILE\n");
+  pthread_join(hebra,NULL);
+  
 
+  for (int i = 0; i < bins; ++i){
+    
+    //printf("\n[%d,  %d]",inicioRango,finRango);
+    printf("[%d] ",cuadrantePadre->histograma[i]);
+  }
   return 0;
 }
 
-/*void TextDisplay(bmpInfoHeader *info, unsigned char *img)
-{
-  int x, y;
-  /* Reducimos la resolución vertical y horizontal para que la imagen entre en pantalla 
-  static const int reduccionX=6, reduccionY=4;
-  /* Si la componente supera el umbral, el color se marcará como 1. 
-  static const int umbral=90;
-  /* Asignamos caracteres a los colores en pantalla 
-  static unsigned char colores[9]=" bgfrRGB";
-  int r,g,b;
-
-  /* Dibujamos la imagen 
-  for (y=info->height; y>0; y-=reduccionY)
-    {
-      for (x=0; x<info->width; x+=reduccionX)
-    {
-      b=(img[3*(x+y*info->width)]>umbral);
-      g=(img[3*(x+y*info->width)+1]>umbral);
-      r=(img[3*(x+y*info->width)+2]>umbral);
-
-      printf("%c", colores[b+g*2+r*4]);
-    }
-      printf("\n");
-    }
-}*/
-
-IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader)
-{
-
+//Guarda la imagen en el puntero asociado
+IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader){
   FILE *f;
   bmpFileHeader header;     /* cabecera */
   //unsigned char *imgdata;   /* datos de imagen */
@@ -222,8 +232,8 @@ IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader)
   return imgdata;
 }
 
-void DisplayInfo(bmpInfoHeader *info)
-{
+//Revisar parametros
+void DisplayInfo(bmpInfoHeader *info){
   printf("Tamaño de la cabecera: %u\n", info->headersize);
   printf("Anchura: %d\n", info->width);
   printf("Altura: %d\n", info->height);
@@ -237,10 +247,20 @@ void DisplayInfo(bmpInfoHeader *info)
   printf("Colores importantes: %d\n", info->imxtcolors);
 }
 
-/*
-[structPadre]                                                             lvl0 por hebra  el padre espere al hijo
-[[hijo] [hijo] [hijo] [hijo] ]    lvl1
-*/
+//Asignar cuadrante a hijo
+/* Detalle grafico
+0     w/2      w
+1        2
+0 0 0 0| 0 0 0 0 0      primer cuadrante : h = 0   -> h/2
+0 0 0 0| 0 0 0 0                           w = 0   -> w/2
+0 0 0 0| 0 0 0 0        Segundo cuadrante: h = 0   -> h/2
+0 0 0 0| 0 0 0 0                           w = w/2 -> w
+---------------- h/2    Tercer cuadrante : h = h/2 -> h
+0 0 0 0| 0 0 0 0                           w = 0   -> w/2    
+0 0 0 0| 0 0 0 0        Cuarto cuadrante : h = h/2 -> h
+0 0 0 0| 0 0 0 0                           w = w/2 -> w
+0 0 0 0| 0 0 0 0 h
+3        4                                              */
 void asignarImgSubCuadrantes(cuadrante * structPadre){  
   int height= structPadre->height;
   int width = structPadre->width;
@@ -264,6 +284,10 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
   //Apuntar esta matriz al subcuandrante del padre correspondiente
   cuadrante * subcuadrante = (cuadrante*)malloc(sizeof(cuadrante)*1);
   subcuadrante->cuadrantePrincipal = imgsubcuadrante1;
+  subcuadrante->histograma = (int*)malloc(sizeof(int)*bins);
+  for (int i = 0; i < bins; ++i){
+    subcuadrante->histograma[i] = 0;
+  }
   subcuadrante->height = height/2;
   subcuadrante->width = width/2;
   subcuadrante->lvl = lvlPadre +1;
@@ -292,6 +316,10 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
   //Apuntar esta matriz al subcuandrante del padre correspondiente
   cuadrante * subcuadrante2 = (cuadrante*)malloc(sizeof(cuadrante)*1);
   subcuadrante2->cuadrantePrincipal = imgsubcuadrante2;
+  subcuadrante2->histograma = (int*)malloc(sizeof(int)*bins);
+  for (int i = 0; i < bins; ++i){
+    subcuadrante2->histograma[i] = 0;
+  }
   subcuadrante2->height = height/2;
   subcuadrante2->width = width/2;
   subcuadrante2->lvl = lvlPadre +1;
@@ -320,6 +348,10 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
   //Apuntar esta matriz al subcuandrante del padre correspondiente
   cuadrante * subcuadrante3 = (cuadrante*)malloc(sizeof(cuadrante)*1);
   subcuadrante3->cuadrantePrincipal = imgsubcuadrante3;
+  subcuadrante3->histograma = (int*)malloc(sizeof(int)*bins);
+  for (int i = 0; i < bins; ++i){
+    subcuadrante3->histograma[i] = 0;
+  }
   subcuadrante3->height = height/2;
   subcuadrante3->width = width/2;
   subcuadrante3->lvl = lvlPadre +1;
@@ -348,6 +380,10 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
   //Apuntar esta matriz al subcuandrante del padre correspondiente
   cuadrante * subcuadrante4 = (cuadrante*)malloc(sizeof(cuadrante)*1);
   subcuadrante4->cuadrantePrincipal = imgsubcuadrante4;
+  subcuadrante4->histograma = (int*)malloc(sizeof(int)*bins);
+  for (int i = 0; i < bins; ++i){
+    subcuadrante4->histograma[i] = 0;
+  }
   subcuadrante4->height = height/2;
   subcuadrante4->width = width/2;
   subcuadrante4->lvl = lvlPadre +1;
@@ -356,29 +392,11 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
   subcuadrante4->subCuadrante3 = NULL;
   subcuadrante4->subCuadrante4 = NULL;
   structPadre->subCuadrante4 = subcuadrante4;
-/*
-0     w/2      w
-1        2
-0 0 0 0| 0 0 0 0 0      primer cuadrante : h = 0   -> h/2
-0 0 0 0| 0 0 0 0                           w = 0   -> w/2
-0 0 0 0| 0 0 0 0        Segundo cuadrante: h = 0   -> h/2
-0 0 0 0| 0 0 0 0                           w = w/2 -> w
----------------- h/2    Tercer cuadrante : h = h/2 -> h
-0 0 0 0| 0 0 0 0                           w = 0   -> w/2    
-0 0 0 0| 0 0 0 0        Cuarto cuadrante : h = h/2 -> h
-0 0 0 0| 0 0 0 0                           w = w/2 -> w
-0 0 0 0| 0 0 0 0 h
-3        4                                              */
 };
 
+//Calcular histograma de x struct Cuadrante
 void calcularHistograma(cuadrante * structPadre){
-  //Print para pasar la imagen de prueba
-  /*for(size_t i=0;i<structPadre->height;i++){
-    for(size_t j=0; j<structPadre->width;j++){
-      printf("[%d %d %d] ",structPadre->cuadrantePrincipal[i][j].r,structPadre->cuadrantePrincipal[i][j].g,structPadre->cuadrantePrincipal[i][j].b);
-    }
-  }*/
-
+  //Proceso calcular histograma
   for(size_t i=0;i<structPadre->height;i++){
     for(size_t j=0; j<structPadre->width;j++){
       //Convertir rgb a gris
@@ -394,7 +412,6 @@ void calcularHistograma(cuadrante * structPadre){
   //inicioRango = 0;
   //finRango = 0;
   for (int i = 0; i < bins; ++i){
-
     //printf("\n[%d,  %d]",inicioRango,finRango);
     printf("[%d] ",structPadre->histograma[i]);
   }
@@ -408,6 +425,11 @@ void calcularHistograma(cuadrante * structPadre){
   [192, 223]6
   [224, 255]7
   */
+}
 
-
+//Sumar histogramas hijos y almacenarlo en el padre
+void sumarHistogramas(cuadrante * structPadre){
+  for (int i = 0; i < bins; ++i){
+    structPadre->histograma[i] = structPadre->subCuadrante1->histograma[i] + structPadre->subCuadrante2->histograma[i] +structPadre->subCuadrante3->histograma[i] +structPadre->subCuadrante4->histograma[i];
+  }
 }
