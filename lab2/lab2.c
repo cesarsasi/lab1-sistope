@@ -22,18 +22,25 @@ int bins = 0;
 int rangoBins = 0;
 int ultimoNivel= 0;
 int flag = 0;
-
-typedef struct bmpFileHeader
-{
-  /* 2 bytes de identificación */
+/*
+Estructura : 
+Entrada    :
+Salida     :
+Observaciones:
+*/
+typedef struct bmpFileHeader{ /* 2 bytes de identificación */
   unsigned int size;        /* Tamaño del archivo */
   uint16_t resv1;           /* Reservado */
   uint16_t resv2;           /* Reservado */
   unsigned int offset;      /* Offset hasta hasta los datos de imagen */
 } bmpFileHeader;
-
-typedef struct bmpInfoHeader
-{
+/*
+Estructura : 
+Entrada    :
+Salida     :
+Observaciones:
+*/
+typedef struct bmpInfoHeader{
   unsigned int headersize;  /* Tamaño de la cabecera       */
   int width;                /* Ancho                       */
   int height;               /* Alto                        */
@@ -46,7 +53,12 @@ typedef struct bmpInfoHeader
   unsigned int colors;      /* colors used en la paleta */
   unsigned int imxtcolors;  /* Colores importantes. 0 si son todos */
 } bmpInfoHeader;
-
+/*
+Estructura : 
+Entrada    :
+Salida     :
+Observaciones:
+*/
 typedef struct IMAGErgb{                                                                                                                                                                                                                             
     unsigned char  b;                                                                                                                                                                                                                        
     unsigned char  g;                                                                                                                                                                                                                        
@@ -54,7 +66,12 @@ typedef struct IMAGErgb{
     unsigned char alfa;
 
 } IMAGErgb;
-
+/*
+Estructura : 
+Entrada    :
+Salida     :
+Observaciones:
+*/
 typedef struct cuadrante{  
     IMAGErgb ** cuadrantePrincipal;
     int * histograma;  
@@ -75,7 +92,15 @@ void calcularHistograma(cuadrante * structPadre);
 void sumarHistogramas(cuadrante * structPadre);
 
 
-//./lab2 -i imagen_1.bmp -o histograma.txt -L 4 -B 6
+//
+/*
+FUNCION : Guarda la imagen en el puntero asociado
+Entrada :
+Salida  :
+Observaciones:
+./lab2 -i imagen_1.bmp -o histograma.txt -L 4 -B 4 
+./lab2 -i imagen_1.bmp -o histograma.txt -L 4 -B 4 -d
+*/
 int main(int argc, char** argv){
   
   int niveles,numerodeBins;
@@ -170,6 +195,12 @@ int main(int argc, char** argv){
   return 0;
 }
 
+/*
+FUNCION : Guarda la imagen en el puntero asociado
+Entrada :
+Salida  :
+Observaciones:
+*/
 void *crearHebras(void *padre){
   cuadrante * padrecito = (cuadrante *)padre;
   asignarImgSubCuadrantes(padrecito);
@@ -191,7 +222,12 @@ void *crearHebras(void *padre){
   pthread_exit(NULL);
 }
 
-//Guarda la imagen en el puntero asociado
+/*
+FUNCION : Guarda la imagen en el puntero asociado
+Entrada :
+Salida  :
+Observaciones:
+*/
 IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader){
   FILE *f;
   bmpFileHeader header;       /* cabecera */
@@ -228,7 +264,12 @@ IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader){
   return imgdata;
 }
 
-//Revisar parametros
+/*
+FUNCION : Revisar parametros
+Entrada :
+Salida  :
+Observaciones:
+*/
 void DisplayInfo(bmpInfoHeader *info){
   printf("Tamaño de la cabecera: %u\n", info->headersize);
   printf("Anchura: %d\n", info->width);
@@ -243,8 +284,12 @@ void DisplayInfo(bmpInfoHeader *info){
   printf("Colores importantes: %d\n", info->imxtcolors);
 }
 
-//Asignar cuadrante a hijo
-/* Detalle grafico
+
+/*
+FUNCION : Asignar cuadrante a hijo
+Entrada :
+Salida  :
+Observaciones: Detalle grafico
 0     w/2      w
 subc1    subc2
 0 0 0 0| 0 0 0 0 0      primer cuadrante : h = 0   -> h/2
@@ -256,7 +301,8 @@ subc1    subc2
 0 0 0 0| 0 0 0 0        Cuarto cuadrante : h = h/2 -> h
 0 0 0 0| 0 0 0 0                           w = w/2 -> w
 0 0 0 0| 0 0 0 0 h
-subc3    subc4                                            */
+subc3    subc4                                            
+*/
 void asignarImgSubCuadrantes(cuadrante * structPadre){  
   int height= structPadre->height;
   int width = structPadre->width;
@@ -378,7 +424,6 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
   subcuadrante4->subCuadrante3 = NULL;
   subcuadrante4->subCuadrante4 = NULL;
   structPadre->subCuadrante4 = subcuadrante4;
-
 };
 
 /*
