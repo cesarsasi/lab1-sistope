@@ -158,18 +158,23 @@ void *crearHebras(void *padre){
   pthread_t hebras[4];
   if(padrecito->lvl < ultimoNivel){
     pthread_create(&hebras[0],NULL, crearHebras,(void*)padrecito->subCuadrante1);
+    pthread_join(hebras[0],NULL);
     pthread_create(&hebras[1],NULL, crearHebras,(void*)padrecito->subCuadrante2);
+    pthread_join(hebras[1],NULL);
     pthread_create(&hebras[2],NULL, crearHebras,(void*)padrecito->subCuadrante3);
-    pthread_create(&hebras[4],NULL, crearHebras,(void*)padrecito->subCuadrante4);
+    pthread_join(hebras[2],NULL);
+    pthread_create(&hebras[3],NULL, crearHebras,(void*)padrecito->subCuadrante4);
+    pthread_join(hebras[3],NULL);
+    /*
     pthread_join(hebras[0],NULL);
     pthread_join(hebras[1],NULL);
     pthread_join(hebras[2],NULL);
-    pthread_join(hebras[3],NULL);
-    sumarHistogramas(padrecito);
+    pthread_join(hebras[3],NULL);*/
   }else{
     calcularHistograma(padrecito);
     pthread_exit(NULL);
   }
+  sumarHistogramas(padrecito);
   pthread_exit(NULL);
 }
 
