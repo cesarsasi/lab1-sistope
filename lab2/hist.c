@@ -109,6 +109,12 @@ int main(int argc, char** argv){
         exit(EXIT_FAILURE);
       }else{
         archivoImagen = optarg;
+        FILE* fileFinal = fopen(archivoHistograma, "r");
+        if(fileFinal==NULL){
+          printf("\nIngreso de parametro i incorrecto!, el archivo no existe \n");
+          exit(EXIT_FAILURE);
+        }
+        fclose(fileFinal);
       }
       break;
     case 'o':
