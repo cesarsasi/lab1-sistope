@@ -37,9 +37,11 @@ typedef struct bmpInfoHeader
 } bmpInfoHeader;
 
 typedef struct IMAGErgb{                                                                                                                                                                                                                             
-    unsigned char  r;                                                                                                                                                                                                                        
-    unsigned char  g;                                                                                                                                                                                                                        
     unsigned char  b;                                                                                                                                                                                                                        
+    unsigned char  g;                                                                                                                                                                                                                        
+    unsigned char  r; 
+    unsigned char alfa;
+
 } IMAGErgb;
 
 typedef struct cuadrante{  
@@ -218,7 +220,7 @@ IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader){
   }
   for(size_t i=0;i<bInfoHeader->height;i++){
     for(size_t j=0; j<bInfoHeader->width;j++){
-      fread(&imgdata[i][j],1,sizeof(IMAGErgb),f);
+      fread(&imgdata[i][j],sizeof(unsigned char),sizeof(IMAGErgb),f);
     }
   }
   /* Cerramos */
@@ -392,9 +394,19 @@ void calcularHistograma(cuadrante *structPadre){
     for(int j=0; j<structPadre->width;j++){
       //Convertir rgb a gris
       int valorGris = structPadre->cuadrantePrincipal[i][j].r * 0.3 + structPadre->cuadrantePrincipal[i][j].g * 0.59 + structPadre->cuadrantePrincipal[i][j].b * 0.11;
+      int limiteInf = 0;
+      int limiteSup = limiteInf + rangoBins-1;
+      printf("%d\n", valorGris );
+      for (int k = 0; k < bins; ++k){
+        if (limiteInf<= valorGris && limiteSup>=valorGris){
+          structPadre->histograma[k] +=1;
+        }
+        limiteInf+=rangoBins;
+        limiteSup+=rangoBins;
+      }
       //Sumar al contador de la seccion del histograma a la que corresponde
-      int posicionHistograma = floor(valorGris/rangoBins);
-      structPadre->histograma[posicionHistograma] +=1;
+      //int posicionHistograma = floor(valorGris/rangoBins);
+      
       //printf("[%d %d %d] ",structPadre->cuadrantePrincipal[i][j].r,structPadre->cuadrantePrincipal[i][j].g,structPadre->cuadrantePrincipal[i][j].b);
     }
   }
