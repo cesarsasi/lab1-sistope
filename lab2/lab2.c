@@ -1,3 +1,13 @@
+/*
+Laboratorio 2
+Profesor   : Fernando Rannou
+Ayudante   : Benjamin Muñoz
+Integrantes:    
+-                Octavio Nicolas Canales Ñirriman 20.003.610-7
+-                César Antonio Salazar Silva      19.916.471-6
+Sistemas Operativos 2.2020  (Creación: 2 de Diciembre del 2020)
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -8,9 +18,10 @@
 
 int heightOriginal = 0;
 int widthOriginal = 0;
-int bins = 0; //rango
+int bins = 0;
 int rangoBins = 0;
 int ultimoNivel= 0;
+int flag = 0;
 
 typedef struct bmpFileHeader
 {
@@ -69,55 +80,50 @@ int main(int argc, char** argv){
   
   int niveles,numerodeBins;
   char* archivoImagen,*archivoHistograma;
-  int flag;
   char *mflag;
   int c;
   while (( (c = getopt(argc, argv, "i:o:L:B:d")) != -1)){
-      switch (c)
-      {
-      case 'i':
-      //
-          mflag = optarg; 
+    switch (c)
+    {
+    case 'i':
+      mflag = optarg; 
       if(optarg == 0){
         printf("\nIngreso de parametro i incorrecto! \n");
-              exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
       }else{
         archivoImagen = optarg;
       }
-        break;
-      case 'o':
-      //
-          mflag = optarg; 
-          if(optarg == 0){
+      break;
+    case 'o':
+      mflag = optarg; 
+      if(optarg == 0){
         printf("\nIngreso de parametro o incorrecto!\n");
-              exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
       }else{
         archivoHistograma = optarg;
       }
-        break;
-      case 'L':
-      //
+      break;
+    case 'L':
       mflag = optarg; 
-          if(optarg == 0){
+      if(optarg == 0){
         printf("\nIngreso de parametro L incorrecto!\n");
-              exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
       }else{
         niveles = atof(optarg);
       }
-        break;      
-      case 'B':
-      //
+      break;      
+    case 'B':
       if(optarg == 0){
         printf("\nIngreso de parametro B incorrecto!\n");
-              exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
       }else{
         numerodeBins = atof(optarg);
       }
-        break;
-      case 'd':
+      break;
+    case 'd':
       flag = 1;
       break;
-      }
+    }
   }
   //Dar valor a variables globales
   ultimoNivel = niveles;       // Nivel maximo
@@ -129,23 +135,25 @@ int main(int argc, char** argv){
   //Asignamos un puntero a la matriz de la imagen obtenida
   img=LoadBMP(archivoImagen, &info);
   //Printear info de la imagen
-  DisplayInfo(&info);
-
+  if (flag == 1){
+    DisplayInfo(&info);
+  }
   //Creamos Struct nivel 0
   cuadrante * cuadrantePadre = (cuadrante*)calloc(sizeof(cuadrante),1);
   int *histograma = (int*)calloc(sizeof(int),bins);
-  
   cuadrantePadre->cuadrantePrincipal = img;
   cuadrantePadre->height=heightOriginal;
   cuadrantePadre->width=widthOriginal;
   cuadrantePadre->lvl= 0;
   cuadrantePadre->histograma = histograma;
   //calcularHistograma(cuadrantePadre);
-
   pthread_t hebra;
   pthread_create(&hebra, NULL, crearHebras, (void*)cuadrantePadre);
   pthread_join(hebra,NULL);
-  printf("\n--------------- HISTOGRAMA PADRE ---------------\n");
+  //Mostrar e imprimir resultado
+  if (flag == 1){
+    printf("\n--------------- HISTOGRAMA PADRE ---------------\n");
+  }
   int limiteInf = 0;
   int limiteSup = limiteInf + rangoBins-1;
   FILE* fileFinal = fopen(archivoHistograma, "w");
@@ -154,12 +162,11 @@ int main(int argc, char** argv){
     limiteInf+=rangoBins;
     limiteSup+=rangoBins;
     fprintf(fileFinal, "\n");
-    printf("[%d] ",cuadrantePadre->histograma[i]);
+    if (flag == 1){
+      printf("[%d,    %d]    %d",limiteInf, limiteSup, cuadrantePadre->histograma[i]);
+      printf("\n");
+    }
   }
-  printf("\n");
-
-
-
   return 0;
 }
 
@@ -176,11 +183,6 @@ void *crearHebras(void *padre){
     pthread_join(hebras[2],NULL);
     pthread_create(&hebras[3],NULL, crearHebras,(void*)padrecito->subCuadrante4);
     pthread_join(hebras[3],NULL);
-    /*
-    pthread_join(hebras[0],NULL);
-    pthread_join(hebras[1],NULL);
-    pthread_join(hebras[2],NULL);
-    pthread_join(hebras[3],NULL);*/
   }else{
     calcularHistograma(padrecito);
     pthread_exit(NULL);
@@ -192,24 +194,21 @@ void *crearHebras(void *padre){
 //Guarda la imagen en el puntero asociado
 IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader){
   FILE *f;
-  bmpFileHeader header;     /* cabecera */
+  bmpFileHeader header;       /* cabecera */
   //unsigned char *imgdata;   /* datos de imagen */
-  uint16_t type;        /* 2 bytes identificativos */
+  uint16_t type;              /* 2 bytes identificativos */
   f=fopen (filename, "rb");
   if (!f)
-    return NULL;        /* Si no podemos leer, no hay imagen*/
-  /* Leemos los dos primeros bytes */
+    return NULL;              /* Si no podemos leer, no hay imagen, leemos los dos primeros bytes */
   fread(&type, sizeof(uint16_t), 1, f);
-  if (type !=0x4D42){   /* Comprobamos el formato */
+  if (type !=0x4D42){         /* Comprobamos el formato */
       fclose(f);
       return NULL;
-    }
-  /* Leemos la cabecera de fichero completa */
+    }                         /* Leemos la cabecera de fichero completa */
   fread(&header, sizeof(bmpFileHeader), 1, f);
   /* Leemos la cabecera de información completa */
   fread(bInfoHeader, sizeof(bmpInfoHeader), 1, f);
-  /* Nos situamos en el sitio donde empiezan los datos de imagen,
-   nos lo indica el offset de la cabecera de fichero*/
+  /* Nos situamos en el sitio donde empiezan los datos de imagen, nos lo indica el offset de la cabecera de fichero*/
   fseek(f, header.offset, SEEK_SET);
   /* Reservamos memoria para la imagen, ¿cuánta? Tanto como indique imgsize */
   IMAGErgb **imgdata=(IMAGErgb**)calloc(sizeof(IMAGErgb*),bInfoHeader->height);
@@ -223,7 +222,7 @@ IMAGErgb **LoadBMP(char *filename, bmpInfoHeader *bInfoHeader){
       fread(&imgdata[i][j],sizeof(unsigned char),sizeof(IMAGErgb),f);
     }
   }
-  /* Cerramos */
+  /* Cerramos el archivo */
   fclose(f);
   /* Devolvemos la imagen */
   return imgdata;
@@ -247,7 +246,7 @@ void DisplayInfo(bmpInfoHeader *info){
 //Asignar cuadrante a hijo
 /* Detalle grafico
 0     w/2      w
-1        2
+subc1    subc2
 0 0 0 0| 0 0 0 0 0      primer cuadrante : h = 0   -> h/2
 0 0 0 0| 0 0 0 0                           w = 0   -> w/2
 0 0 0 0| 0 0 0 0        Segundo cuadrante: h = 0   -> h/2
@@ -257,12 +256,11 @@ void DisplayInfo(bmpInfoHeader *info){
 0 0 0 0| 0 0 0 0        Cuarto cuadrante : h = h/2 -> h
 0 0 0 0| 0 0 0 0                           w = w/2 -> w
 0 0 0 0| 0 0 0 0 h
-3        4                                              */
+subc3    subc4                                            */
 void asignarImgSubCuadrantes(cuadrante * structPadre){  
   int height= structPadre->height;
   int width = structPadre->width;
   int lvlPadre = structPadre->lvl;
-  
   //Asignamos memoria a el subcuadrante
   IMAGErgb **imgsubcuadrante1=(IMAGErgb**)calloc(sizeof(IMAGErgb*),(height/2));
   for(int i=0; i< (height/2);i++){
@@ -290,7 +288,6 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
   subcuadrante->subCuadrante3 = NULL;
   subcuadrante->subCuadrante4 = NULL;
   structPadre->subCuadrante1 = subcuadrante;
-
   //Asignamos memoria a el subcuadrante
   IMAGErgb **imgsubcuadrante2=(IMAGErgb**)calloc(sizeof(IMAGErgb*),(height/2));
   for(int i=0; i< (height/2);i++){
@@ -338,7 +335,6 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
     w3=0;
     h3++;
   }
-
   //Apuntar esta matriz al subcuandrante del padre correspondiente
   cuadrante * subcuadrante3 = (cuadrante*)calloc(sizeof(cuadrante),1);
   subcuadrante3->cuadrantePrincipal = imgsubcuadrante3;
@@ -353,7 +349,6 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
   subcuadrante3->subCuadrante4 = NULL;
   structPadre->subCuadrante3 = subcuadrante3;
 
-  
   //Asignamos memoria a el subcuadrante
   IMAGErgb **imgsubcuadrante4=(IMAGErgb**)calloc(sizeof(IMAGErgb*),(height/2));
   for(int i=0; i< (height/2);i++){
@@ -370,7 +365,6 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
     w4=0;
     h4++;
   }
-
   //Apuntar esta matriz al subcuandrante del padre correspondiente
   cuadrante * subcuadrante4 = (cuadrante*)calloc(sizeof(cuadrante),1);
   subcuadrante4->cuadrantePrincipal = imgsubcuadrante4;
@@ -387,7 +381,20 @@ void asignarImgSubCuadrantes(cuadrante * structPadre){
 
 };
 
-//Calcular histograma de x struct Cuadrante
+/*
+FUNCION : Calcular histograma de x struct Cuadrante
+Entrada :
+Salida  :
+Observaciones: Logica Histograma
+  [ 0, 31]  0    [x,x,x,x,x,x,x,x]
+  [32, 63]  1
+  [64, 95]  2
+  [96, 127] 3     105/32 = 3,8 -> 3 (indice)
+  [128, 159]4
+  [160, 191]5
+  [192, 223]6
+  [224, 255]7
+*/
 void calcularHistograma(cuadrante *structPadre){
   //Proceso calcular histograma
   for(int i=0;i<structPadre->height;i++){
@@ -396,40 +403,27 @@ void calcularHistograma(cuadrante *structPadre){
       int valorGris = structPadre->cuadrantePrincipal[i][j].r * 0.3 + structPadre->cuadrantePrincipal[i][j].g * 0.59 + structPadre->cuadrantePrincipal[i][j].b * 0.11;
       int limiteInf = 0;
       int limiteSup = limiteInf + rangoBins-1;
-      printf("%d\n", valorGris );
-      for (int k = 0; k < bins; ++k){
-        if (limiteInf<= valorGris && limiteSup>=valorGris){
-          structPadre->histograma[k] +=1;
-        }
-        limiteInf+=rangoBins;
-        limiteSup+=rangoBins;
-      }
       //Sumar al contador de la seccion del histograma a la que corresponde
-      //int posicionHistograma = floor(valorGris/rangoBins);
-      
-      //printf("[%d %d %d] ",structPadre->cuadrantePrincipal[i][j].r,structPadre->cuadrantePrincipal[i][j].g,structPadre->cuadrantePrincipal[i][j].b);
+      int posicionHistograma = floor(valorGris/rangoBins);
+      structPadre->histograma[posicionHistograma] +=1;
     }
   }
-
   //PrintearHistograma
-  printf("\n--------------- HISTOGRAMA HEBRA ---------------\n");
-  for (int i = 0; i < bins; ++i){
-    //printf("\n[%d,  %d]",inicioRango,finRango);
-    printf("[%d] ",structPadre->histograma[i]);
+  if (flag == 1){
+    printf("\n--------------- HISTOGRAMA HEBRA ---------------\n");
+    for (int i = 0; i < bins; ++i){
+      //printf("\n[%d,  %d]",inicioRango,finRango);
+      printf("[%d] ",structPadre->histograma[i]);
+    }
   }
-  /* Logica Histograma
-  [ 0, 31]  0    [x,x,x,x,x,x,x,x]
-  [32, 63]  1
-  [64, 95]  2
-  [96, 127] 3     105/32 = 3,8 -> 3
-  [128, 159]4
-  [160, 191]5
-  [192, 223]6
-  [224, 255]7
-  */
 }
 
-//Sumar histogramas hijos y almacenarlo en el padre
+/*
+FUNCION : Sumar histogramas hijos de un cuadrante y almacenarlo en el padre
+Entrada :
+Salida  :
+Observaciones: 
+*/
 void sumarHistogramas(cuadrante * structPadre){
   for (int i = 0; i < bins; ++i){
     structPadre->histograma[i] = structPadre->subCuadrante1->histograma[i] + structPadre->subCuadrante2->histograma[i] +structPadre->subCuadrante3->histograma[i] +structPadre->subCuadrante4->histograma[i];
