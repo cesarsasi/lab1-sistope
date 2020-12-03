@@ -144,11 +144,20 @@ int main(int argc, char** argv){
   pthread_create(&hebra, NULL, crearHebras, (void*)cuadrantePadre);
   pthread_join(hebra,NULL);
   printf("\n--------------- HISTOGRAMA PADRE ---------------\n");
+  int limiteInf = 0;
+  int limiteSup = limiteInf + rangoBins-1;
+  FILE* fileFinal = fopen(archivoHistograma, "w");
   for (int i = 0; i < bins; ++i){
-    //printf("\n[%d,  %d]",inicioRango,finRango);
+    fprintf(fileFinal,"[%d,    %d]    %d",limiteInf, limiteSup, cuadrantePadre->histograma[i]);
+    limiteInf+=rangoBins;
+    limiteSup+=rangoBins;
+    fprintf(fileFinal, "\n");
     printf("[%d] ",cuadrantePadre->histograma[i]);
   }
   printf("\n");
+
+
+
   return 0;
 }
 
