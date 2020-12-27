@@ -1,3 +1,3 @@
 all:
-	gcc hist.c -o lab2 -lm -lpthread
+	gcc lab3.c -o lab3 -lm -lpthread
 	
