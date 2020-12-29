@@ -8,11 +8,12 @@ void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int me
     fprintf(fileFinal,"Potencia: %d",potencia);
     fprintf(fileFinal,"Ruido total %d:",ruidoTotal);
 }
+/*
 0 u
 1 v
 2 r
 3 i
-4 w
+4 w */
 float calculoPotenciaParcial(float ** matriz, cantidad){
     float potenciaParcial = 0;
     for (int i = 0; i < cantidad; ++i){
