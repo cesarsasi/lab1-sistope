@@ -137,6 +137,21 @@ int main(int argc, char** argv){
         }
         printf("\n");
     }
+    //crear y ejecutar hebras de discos
+    pthread_t* hebras;
+    hebras = (pthread_t)calloc(sizeof(pthread_t),cantDiscos);
+    /*
+    for(int i=0; i < cantDiscos;i++){
+        pthread_create(&hebras[i],NULL,imprimir,&i);
+        pthread_join(hebras[i],NULL);//Cuando termine de leer y termine de procesar
+    }*/
+
+    //Distribucion y como identificar cuando un punto va a un monitor
+
+    
+
+
+    //Leer
 
 	return 0;
 }
