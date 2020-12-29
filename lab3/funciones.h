@@ -13,16 +13,16 @@ void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int me
 2 r
 3 i
 4 w
-int calculoPotenciaParcial(int ** matriz, cantidad){
-    int potenciaParcial = 0;
+float calculoPotenciaParcial(float ** matriz, cantidad){
+    float potenciaParcial = 0;
     for (int i = 0; i < cantidad; ++i){
         potenciaParcial += pow(matriz[i][2],2) + sqrt(pow(matriz[i][3],2));
     }
     return potenciaParcial;
 }
 
-int calculoRuidoTotalParcial(int ** matriz, cantidad){
-    int ruidoTotalParcial = 0;
+float calculoRuidoTotalParcial(float ** matriz, cantidad){
+    float ruidoTotalParcial = 0;
     for (int i = 0; i < cantidad; ++i){
         potenciaParcial += matriz[i][4];
     }
