@@ -145,13 +145,46 @@ int main(int argc, char** argv){
         pthread_create(&hebras[i],NULL,imprimir,&i);
         pthread_join(hebras[i],NULL);//Cuando termine de leer y termine de procesar
     }*/
+    //Calcular rango de cada disco
+    int * rangosDisco = (int)calloc(sizeof(int),cantDiscos+1);
+    for (int i = 0; i < cantDiscos; ++i){
+    	rangosDisco[i] = anchoDiscos*i;
+    }
 
+    //Productor calcula propiedades del consumidor y consumidor es el que calcula todu
     //Distribucion y como identificar cuando un punto va a un monitor
+    for(int i = 0; i < largo; i ++){
+    	//Leemos la linea en particular
+    	float posU = archivoGuardado[i][0];
+		float posV = archivoGuardado[i][1];
+    	//Obtenemos su distancia del centro}
+    	float sumPot = pow(posU,2) + pow(posV,2);
+    	float dist = sqrt(sumPot);
+    	//calculamos en que disco queda asignada (indice del monitor en el arreglo)
+    	int indiceDiscAsignado = -1;
+    	for (int j = 0; j < cantDiscos; ++j){
+    		if( rangosDisco[j]<dist && rangosDisco[j]+anchoDiscos>dist){
+    			indiceDiscAsignado = j;
+    		}
+    	}
 
-    
+    	//Monitores quedan en una matriz ordenados del menos disco al mayor
+    	//con este for identificamos el monitor que debemos usar
+    	for(recorremos el largo de la lista de monitores y nos detenemos en el correspondiente){
+    		//introducimos la linea en el monitor
+    		if(el buffer del monitor no esta lleno al 100%){
+    			//continua
 
+    		}else(el buffer queda lleno){
+				//ejecutamos el proceso y hacemos que la hebra se ejecute haciendo esperar la lectura
+				//se vacia el buffer del monitor y continua la lectura
+    		}
+    	}
+    }
 
-    //Leer
+    //Juntar resultados en las hebras y mandarlo a la estructura de resultado total
+
+    //Printear o escribir en documento
 
 	return 0;
 }

@@ -1,20 +1,13 @@
-float calculoMediaReal(float matriz[3][5], int largo){
-	float sumaReal=0.0;
-	float largoF= (float)largo;
-	float mediaR;
-	for(int i=0;i<largo;i++){
-		sumaReal=sumaReal+matriz[i][2];
-	}
-	mediaR = sumaReal/largoF;
-	return mediaR;
-}
-float calculoMediaImaginaria(float matriz[3][5], int largo){
-	float sumaImaginaria =0.0;
-	float largoF=(float)largo;
-	float mediaI;
-	for(int i=0;i<largo;i++){
-		sumaImaginaria=sumaImaginaria+matriz[i][3];
-	}
-	mediaI= sumaImaginaria/largoF;
-	return mediaI;
+//Calculador reune las funciones.h y las ejecuta 
+void calculador(){
+	float ** matriz
+	float resultadoParcial[4];
+	resultadoParcial[0] = calculoPotenciaParcial(float ** matriz, cantidad);
+	resultadoParcial[1] =  calculoRuidoTotalParcial(float ** matriz, cantidad);
+	resultadoParcial[2] =  calculoMediaReal(float matriz[3][5], int largo);
+	resultadoParcial[3] =  calculoMediaImaginaria(float matriz[3][5], int largo);
+
+	//Escribir en la estructura correspondiente y guardar en el monitor con la estructura Manejo parcial
+
+	//devolverse al productor
 }
