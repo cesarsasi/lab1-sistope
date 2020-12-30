@@ -5,11 +5,19 @@
 #include <unistd.h>
 #include <math.h>
 #include <pthread.h>
-
+#include <funciones1.h>
 
 
 FILE *archivoEntrada;
-
+typedef struct monitor{
+	float **subMatriz;
+	int indiceUltimo;
+	int tamañoBUffer;
+	int head, tail;
+	int full, empty;
+	pthread_mutex_t mutex;
+	pthread_cond_t notFull, notEmpty;
+} Monitor;
 // ./lab3 -i prueba1.csv -o propiedades.txt -d 100 -n 4 -s 10 -b
 int main(int argc, char** argv){
 	char *mflag;
@@ -140,6 +148,19 @@ int main(int argc, char** argv){
     //crear y ejecutar hebras de discos
     pthread_t* hebras;
     hebras = (pthread_t)calloc(sizeof(pthread_t),cantDiscos);
+    //crear monitor
+    Monitor *listaMonitores= (Monitor)calloc(sizeof(Monitor),cantDiscos);
+    for(int i=;i<cantDiscos;i++){
+    	pthread_mutex_init(&listaMonitores[i]->mutex, NULL);
+    	pthread_cond_init(&listaMonitores[i]->notFull, NULL);
+    	pthread_cond_init(&listaMonitores[i]->notEmpty, NULL);
+    	&listaMonitores[i]->indiceUltimo=0;
+    	&listaMonitores[i]->tamañoBUffer=buffer;
+    	&listaMonitores[i]->subMatriz=(float**)calloc(sizeof(float*),buffer);
+    	for(int j=0;j<5;j++){
+    		&listaMonitores[i]->subMatriz[j]=(float*)calloc(sizeof(float),5);
+    	}
+    }
     /*
     for(int i=0; i < cantDiscos;i++){
         pthread_create(&hebras[i],NULL,imprimir,&i);
@@ -167,18 +188,22 @@ int main(int argc, char** argv){
     			indiceDiscAsignado = j;
     		}
     	}
-
-    	//Monitores quedan en una matriz ordenados del menos disco al mayor
-    	//con este for identificamos el monitor que debemos usar
-    	for(recorremos el largo de la lista de monitores y nos detenemos en el correspondiente){
-    		//introducimos la linea en el monitor
-    		if(el buffer del monitor no esta lleno al 100%){
-    			//continua
-
-    		}else(el buffer queda lleno){
-				//ejecutamos el proceso y hacemos que la hebra se ejecute haciendo esperar la lectura
-				//se vacia el buffer del monitor y continua la lectura
+    	if(indiceDiscAsignado != -1){
+    		//con este for identificamos el monitor que debemos usar
+    		if(&listaMonitores->indiceUltimo < buffer){
+	    		&listaMonitores[indiceDiscAsignado]->subMatriz[&listaMonitores->indiceUltimo][0]=archivoGuardado[i][0];
+	    		&listaMonitores[indiceDiscAsignado]->subMatriz[&listaMonitores->indiceUltimo][1]=archivoGuardado[i][1];
+	    		&listaMonitores[indiceDiscAsignado]->subMatriz[&listaMonitores->indiceUltimo][2]=archivoGuardado[i][2];
+	    		&listaMonitores[indiceDiscAsignado]->subMatriz[&listaMonitores->indiceUltimo][3]=archivoGuardado[i][3];
+	    		&listaMonitores[indiceDiscAsignado]->subMatriz[&listaMonitores->indiceUltimo][4]=archivoGuardado[i][4];
+	    		&listaMonitores->indiceUltimo+=1;
     		}
+    		//el buffer queda lleno
+    		else{
+    			//ejecutamos el proceso y hacemos que la hebra se ejecute haciendo esperar la lectura
+    			pthread_create(&hebra[indiceDiscAsignado], NULL, calculador, (void *) &listaMonitores[indiceDiscAsignado]);
+				//se vacia el buffer del monitor y continua la lectura
+    		}	
     	}
     }
 
