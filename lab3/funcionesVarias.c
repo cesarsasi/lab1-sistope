@@ -97,7 +97,7 @@ void asignarDataMonitores(char * archivoVisibilidades, Monitor * listaMonitores)
 
 void crearMonitores(Monitor * listaMonitores){
     //crear monitor
-    listaMonitores= (Monitor)calloc(sizeof(Monitor),cantDiscos);
+    listaMonitores = (Monitor)calloc(sizeof(Monitor),cantDiscos);
     for(int i=0;i<cantDiscos;i++){
     	pthread_mutex_init(&listaMonitores[i]->mutex, NULL);
     	pthread_cond_init(&listaMonitores[i]->notFull, NULL);
