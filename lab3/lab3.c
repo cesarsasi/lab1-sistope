@@ -101,13 +101,13 @@ int main(int argc, char** argv){
     iniciarEstructuraComun();
     
 	//Crear y Seteamos monitores
-	crearMonitor(listaMonitores);
+	crearMonitores(listaMonitores);
 
 	//Crear y ejecutar hebras de discos
-    pthread_t* hebras;
-    hebras = (pthread_t)calloc(sizeof(pthread_t),cantDiscos);
+    pthread_t * hebras;
+    hebras = (pthread_t*)calloc(sizeof(pthread_t),cantDiscos);
     for(int i= 0; i<cantDiscos;i++){
-        pthread_create(&hebras[i], NULL, calculador, (void *) listaMonitores[i]);
+        pthread_create(&hebras[i],NULL,calculador, (void*)listaMonitores[i]);
     }
 
 	//Lectura de lineas y asignacion de variables al monitor

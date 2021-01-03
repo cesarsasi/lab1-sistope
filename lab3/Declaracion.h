@@ -4,7 +4,7 @@
 typedef struct monitor{
 	float **subMatriz;
 	int indiceUltimo;
-	int tamañoBUffer;
+	int tamanoBUffer;
 	int idMonitor;
 	int full, empty;
 	pthread_mutex_t mutex;
@@ -29,7 +29,7 @@ float calculoPotenciaParcial(float ** matriz, int largo);
 float calculoRuidoTotalParcial(float ** matriz, int largo);
 float calculoMediaReal(float ** matriz, int largo);
 float calculoMediaImaginaria(float ** matriz, int largo);
-void calculador(void * monitorVoid);
+void *calculador(void * monitorVoid);
 void asignarDataMonitores(char * archivoVisibilidades, Monitor * listaMonitores);
 void crearMonitores(Monitor * listaMonitores);
 void iniciarEstructuraComun();

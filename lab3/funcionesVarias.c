@@ -63,7 +63,7 @@ float calculoMediaImaginaria(float ** matriz, int largo){
 }
 //*******************************************************************************************************************************
 //Calculador reune las funciones.h y las ejecuta 
-void calculador(void * monitorVoid){
+void * calculador(void * monitorVoid){
 	
 	Monitor * monitor = (Monitor *)monitorVoid;
 	while(true){
