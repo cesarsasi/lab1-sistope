@@ -1,4 +1,4 @@
-salida_out = salida
+salida_out = lab3
 
 
 salida_headers = Declaracion.h
