@@ -23,12 +23,12 @@ int flag;
 Monitor *listaMonitores;
 //Declaracion de funciones a utilizar en el laboratorio
 void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int mediaImag, int potencia, int ruidoTotal);
-float calculoPotenciaParcial(float ** matriz, cantidad);
-float calculoRuidoTotalParcial(float ** matriz, cantidad);
-float calculoMediaReal(float matriz[3][5], int largo);
-float calculoMediaImaginaria(float matriz[3][5], int largo);
-void calculador();
-void asignarDataMonitores(char * archivoVisibilidades, Monitor * listaMonitores):
+float calculoPotenciaParcial(float ** matriz, int cantidad);
+float calculoRuidoTotalParcial(float ** matriz, int cantidad);
+float calculoMediaReal(float ** matriz, int largo);
+float calculoMediaImaginaria(float ** matriz, int largo);
+void calculador(float ** matriz, int largo, int cantidad);
+void asignarDataMonitores(char * archivoVisibilidades, Monitor * listaMonitores);
 void crearMonitores(Monitor * listaMonitores);
 
 #endif

@@ -136,40 +136,7 @@ int main(int argc, char** argv){
     	rangosDisco[i] = anchoDiscos*i;
     }
 
-    //Productor calcula propiedades del consumidor y consumidor es el que calcula todu
-    //Distribucion y como identificar cuando un punto va a un monitor
-    for(int i = 0; i < largo; i ++){
-    	//Leemos la linea en particular
-    	float posU = archivoGuardado[i][0];
-		float posV = archivoGuardado[i][1];
-    	//Obtenemos su distancia del centro}
-    	float sumPot = pow(posU,2) + pow(posV,2);
-    	float dist = sqrt(sumPot);
-    	//calculamos en que disco queda asignada (indice del monitor en el arreglo)
-    	int indiceDiscAsignado = -1;
-    	for (int j = 0; j < cantDiscos; ++j){
-    		if( rangosDisco[j]<dist && rangosDisco[j]+anchoDiscos>dist){
-    			indiceDiscAsignado = j;
-    		}
-    	}
-    	if(indiceDiscAsignado != -1){
-    		//con este for identificamos el monitor que debemos usar
-    		if(&listaMonitores->indiceUltimo < buffer){
-	    		&listaMonitores[indiceDiscAsignado]->subMatriz[&listaMonitores->indiceUltimo][0]=archivoGuardado[i][0];
-	    		&listaMonitores[indiceDiscAsignado]->subMatriz[&listaMonitores->indiceUltimo][1]=archivoGuardado[i][1];
-	    		&listaMonitores[indiceDiscAsignado]->subMatriz[&listaMonitores->indiceUltimo][2]=archivoGuardado[i][2];
-	    		&listaMonitores[indiceDiscAsignado]->subMatriz[&listaMonitores->indiceUltimo][3]=archivoGuardado[i][3];
-	    		&listaMonitores[indiceDiscAsignado]->subMatriz[&listaMonitores->indiceUltimo][4]=archivoGuardado[i][4];
-	    		&listaMonitores->indiceUltimo+=1;
-    		}
-    		//el buffer queda lleno
-    		else{
-    			//ejecutamos el proceso y hacemos que la hebra se ejecute haciendo esperar la lectura
-    			pthread_create(&hebra[indiceDiscAsignado], NULL, calculador, (void *) &listaMonitores[indiceDiscAsignado]);
-				//se vacia el buffer del monitor y continua la lectura
-    		}	
-    	}
-    }
+    
 
     //Juntar resultados en las hebras y mandarlo a la estructura de resultado total
 
