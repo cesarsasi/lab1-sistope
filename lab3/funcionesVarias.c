@@ -17,17 +17,17 @@ void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int me
     fprintf(fileFinal,"Ruido total %d:",ruidoTotal);
 }
 
-float calculoPotenciaParcial(float ** matriz, int cantidad){
+float calculoPotenciaParcial(float ** matriz, int largo){
     float potenciaParcial = 0;
-    for (int i = 0; i < cantidad; ++i){
+    for (int i = 0; i < largo; ++i){
         potenciaParcial += pow(matriz[i][2],2) + sqrt(pow(matriz[i][3],2));
     }
     return potenciaParcial;
 }
 
-float calculoRuidoTotalParcial(float ** matriz, int cantidad){
+float calculoRuidoTotalParcial(float ** matriz, int largo){
     float ruidoTotalParcial = 0;
-    for (int i = 0; i < cantidad; ++i){
+    for (int i = 0; i < largo; ++i){
         ruidoTotalParcial += matriz[i][4];
     }
     return ruidoTotalParcial;
@@ -44,6 +44,7 @@ float calculoMediaReal(float ** matriz, int largo){
     mediaR = sumaReal/largoF;
     return mediaR;
 }
+
 float calculoMediaImaginaria(float ** matriz, int largo){
     float sumaImaginaria =0.0;
     float largoF=(float)largo;
@@ -56,16 +57,16 @@ float calculoMediaImaginaria(float ** matriz, int largo){
 }
 ////////////////////******************************************************************************************************
 //Calculador reune las funciones.h y las ejecuta 
-void calculador(float ** matriz, int largo, int cantidad){
-	float ** matriz;
+void calculador(void * monitorVoid){
+	Monitor * monitor = (Monitor *)monitorVoid;
+	
 	float resultadoParcial[4];
-	resultadoParcial[0] = calculoPotenciaParcial(matriz, cantidad);
-	resultadoParcial[1] =  calculoRuidoTotalParcial(matriz, cantidad);
-	resultadoParcial[2] =  calculoMediaReal(matriz, largo);
-	resultadoParcial[3] =  calculoMediaImaginaria(matriz, largo);
-
+	resultadoParcial[0] = calculoPotenciaParcial(monitor.subMatriz, monitor.indiceUltimo);
+	resultadoParcial[1] = calculoRuidoTotalParcial(monitor.subMatriz, monitor.indiceUltimo);
+	resultadoParcial[2] = calculoMediaReal(monitor.subMatriz, monitor.indiceUltimo); //------------------------------------------Modificar a calculo real!!!!!
+	resultadoParcial[3] = calculoMediaImaginaria(monitor.subMatriz, monitor.indiceUltimo);//-------------------------------------Modificar a calculo real!!!!!
 	//Escribir en la estructura correspondiente y guardar en el monitor con la estructura Manejo parcial
-
+	comun[monitor.idMonitor] = [resultadoParcial[0],resultadoParcial[1],resultadoParcial[2],resultadoParcial[3]]
 	//devolverse al productor
 }
 
@@ -138,11 +139,12 @@ void crearMonitores(Monitor * listaMonitores){
     	pthread_mutex_init(&listaMonitores[i]->mutex, NULL);
     	pthread_cond_init(&listaMonitores[i]->notFull, NULL);
     	pthread_cond_init(&listaMonitores[i]->notEmpty, NULL);
-    	&listaMonitores[i]->indiceUltimo=0;
-    	&listaMonitores[i]->tamañoBUffer=buffer;
-    	&listaMonitores[i]->subMatriz=(float**)calloc(sizeof(float*),buffer);
+    	listaMonitores[i].indiceUltimo=0;
+    	listaMonitores[i].tamañoBUffer=buffer;
+		listaMonitores[i].idMonitor=i+1;
+    	listaMonitores[i].subMatriz=(float**)calloc(sizeof(float*),buffer);
     	for(int j=0;j<5;j++){
-    		&listaMonitores[i]->subMatriz[j]=(float*)calloc(sizeof(float),5);
+    		listaMonitores[i].subMatriz[j]=(float*)calloc(sizeof(float),5);
     	}
     }
 }

@@ -10,7 +10,6 @@
 
 // ./lab3 -i prueba1.csv -o propiedades.txt -d 100 -n 4 -s 10 -b
 int main(int argc, char** argv){
-
 	//Lectura parametros desde la terminal
 	while (( (d = getopt(argc, argv, "i:o:n:s:b")) != -1)){
         switch (d)
@@ -105,20 +104,20 @@ int main(int argc, char** argv){
     pthread_t* hebras;
     hebras = (pthread_t)calloc(sizeof(pthread_t),cantDiscos);
     for(int i= 0; i<cantDiscos;i++){
-        pthread_create(&hebra[i], NULL, calculador, (void *) listaMonitores[i]);
+        pthread_create(&hebras[i], NULL, calculador, (void *) listaMonitores[i]);
     }
 
 	//Lectura de lineas y asignacion de variables al monitor
 	asignarDataMonitores(archivoVisibilidades,listaMonitores);
 
 	//Imprimir matriz Prueba
-	for(int i=0;i<largo;i++){
+	/*for(int i=0;i<largo;i++){
         for(int j=0;j<5;j++){
             printf("%f",archivoGuardado[i][j]);
             printf(" ");
         }
         printf("\n");
-    }
+    }*/
 
 	
 
