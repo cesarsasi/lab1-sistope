@@ -31,5 +31,6 @@ float calculoMediaImaginaria(float ** matriz, int largo);
 void calculador(void * monitorVoid);
 void asignarDataMonitores(char * archivoVisibilidades, Monitor * listaMonitores);
 void crearMonitores(Monitor * listaMonitores);
+void iniciarEstructuraComun();
 
 #endif

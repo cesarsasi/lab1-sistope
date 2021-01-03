@@ -97,10 +97,13 @@ int main(int argc, char** argv){
         }
     }
 
-	//Creamos y Seteamos monitores
+    //Inicializar estructura para resultados totales (comun)
+    iniciarEstructuraComun();
+    
+	//Crear y Seteamos monitores
 	crearMonitor(listaMonitores);
 
-	//crear y ejecutar hebras de discos
+	//Crear y ejecutar hebras de discos
     pthread_t* hebras;
     hebras = (pthread_t)calloc(sizeof(pthread_t),cantDiscos);
     for(int i= 0; i<cantDiscos;i++){
