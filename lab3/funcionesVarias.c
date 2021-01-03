@@ -7,6 +7,12 @@
 #include <pthread.h>
 
 #include "Declaracion.h"
+/*
+0 u
+1 v
+2 r
+3 i
+4 w */
 
 void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int mediaImag, int potencia, int ruidoTotal){
     FILE* fileFinal = fopen(archivoFinal, "a");
@@ -145,30 +151,30 @@ void asignarDataMonitores(){
 				}
 				//con este for identificamos el monitor que debemos usar
 				if(listaMonitores[indiceDiscAsignado].indiceUltimo < buffer){
-					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores.indiceUltimo][0]=archivoGuardado[i][0];
-					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores.indiceUltimo][1]=archivoGuardado[i][1];
-					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores.indiceUltimo][2]=archivoGuardado[i][2];
-					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores.indiceUltimo][3]=archivoGuardado[i][3];
-					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores.indiceUltimo][4]=archivoGuardado[i][4];
+					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores.indiceUltimo][0]=posU;
+					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores.indiceUltimo][1]=posV;
+					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores.indiceUltimo][2]=posR;
+					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores.indiceUltimo][3]=posI;
+					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores.indiceUltimo][4]=posRU;
 					listaMonitores.indiceUltimo+=1;
 				}
 				// se termina la produccion
-				else{//el buffer queda lleno
+				if(listaMonitores[indiceDiscAsignado].indiceUltimo == buffer){//el buffer queda lleno
 					//bloqueamos el mutex del monitor
 					pthread_mutex_lock (&listaMonitores[indiceDiscAsignado]->mutex);
 					//mientras este lleno se bloquea
 					while (buffer->full) {
 						pthread_cond_wait (&listaMonitores[indiceDiscAsignado]->notFull, &listaMonitores[indiceDiscAsignado]->mutex);
 					}
-					//se libera el monitor correspondiente
+					//se libera el monitor correspondiente que ya previamente vacia el buffer del monitor y permite proceder la lectura
 					pthread_cond_signal(&listaMonitores[indiceDiscAsignado]->notEmpty);
 					pthread_mutex_unlock(&listaMonitores[indiceDiscAsignado]->mutex);
-					//se vacia el buffer del monitor y continua la lectura
 				}	
 				
 				
 			}
 		}
+	//Leer lineas que quedan washitas
 	}
 	fclose(archivoEntrada);
 
@@ -201,9 +207,13 @@ void iniciarEstructuraComun(){
 		}
     }
 }
-/*
-0 u
-1 v
-2 r
-3 i
-4 w */
+
+
+//Imprimir matriz Prueba
+	/*for(int i=0;i<largo;i++){
+        for(int j=0;j<5;j++){
+            printf("%f",archivoGuardado[i][j]);
+            printf(" ");
+        }
+        printf("\n");
+    }*/ 

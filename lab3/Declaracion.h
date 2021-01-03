@@ -21,6 +21,7 @@ Monitor *listaMonitores;
 Comun *comun;
 char *mflag, *archivoVisibilidades, *archivoSalida;
 int d,cantDiscos,buffer,anchoDiscos,flag;
+int terminoLectura = 0;
 
 //Declaracion de funciones a utilizar en el laboratorio
 void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int mediaImag, int potencia, int ruidoTotal);

@@ -113,36 +113,10 @@ int main(int argc, char** argv){
 	//Lectura de lineas y asignacion de variables al monitor
 	asignarDataMonitores(archivoVisibilidades,listaMonitores);
 
-	//Imprimir matriz Prueba
-	/*for(int i=0;i<largo;i++){
-        for(int j=0;j<5;j++){
-            printf("%f",archivoGuardado[i][j]);
-            printf(" ");
-        }
-        printf("\n");
-    }*/
-
-	
-
-    
-    
-    /*
-    for(int i=0; i < cantDiscos;i++){
-        pthread_create(&hebras[i],NULL,imprimir,&i);
-        pthread_join(hebras[i],NULL);//Cuando termine de leer y termine de procesar
-    }*/
-
-    //Calcular rango de cada disco
-    int * rangosDisco = (int)calloc(sizeof(int),cantDiscos+1);
-    for (int i = 0; i < cantDiscos; ++i){
-    	rangosDisco[i] = anchoDiscos*i;
-    }
-
-    
-
     //Juntar resultados en las hebras y mandarlo a la estructura de resultado total
-
-    //Printear o escribir en documento
+    for(int i=0; i < cantDiscos;i++){
+        pthread_join(hebras[i],NULL);
+    }
 
 	return 0;
 }
