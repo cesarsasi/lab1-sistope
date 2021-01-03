@@ -21,7 +21,8 @@ Monitor *listaMonitores;
 Comun *comun;
 char *mflag, *archivoVisibilidades, *archivoSalida;
 int d,cantDiscos,buffer,anchoDiscos,flag;
-int terminoLectura = 0;
+int terminoLectura ;
+
 
 //Declaracion de funciones a utilizar en el laboratorio
 void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int mediaImag, int potencia, int ruidoTotal);
@@ -30,8 +31,8 @@ float calculoRuidoTotalParcial(float ** matriz, int largo);
 float calculoMediaReal(float ** matriz, int largo);
 float calculoMediaImaginaria(float ** matriz, int largo);
 void *calculador(void * monitorVoid);
-void asignarDataMonitores(char * archivoVisibilidades, Monitor * listaMonitores);
-void crearMonitores(Monitor * listaMonitores);
+void asignarDataMonitores();
+void crearMonitores();
 void iniciarEstructuraComun();
 
 #endif

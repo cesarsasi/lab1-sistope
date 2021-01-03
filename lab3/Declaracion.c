@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <pthread.h>
+#include<stdbool.h>
 
 #include "Declaracion.h"
 /*
@@ -75,20 +76,20 @@ void * calculador(void * monitorVoid){
 		}
 		// el buffer esta lleno, por lo tanto se ejecuta la logica del lab
 		float resultadoParcial[4];
-		resultadoParcial[0] = calculoPotenciaParcial(monitor.subMatriz, monitor.indiceUltimo);
-		resultadoParcial[1] = calculoRuidoTotalParcial(monitor.subMatriz, monitor.indiceUltimo);
-		resultadoParcial[2] = calculoMediaReal(monitor.subMatriz, monitor.indiceUltimo); //------------------------------------------Modificar a calculo real!!!!!
-		resultadoParcial[3] = calculoMediaImaginaria(monitor.subMatriz, monitor.indiceUltimo);//-------------------------------------Modificar a calculo real!!!!!
+		resultadoParcial[0] = calculoPotenciaParcial(monitor->subMatriz, monitor->indiceUltimo);
+		resultadoParcial[1] = calculoRuidoTotalParcial(monitor->subMatriz, monitor->indiceUltimo);
+		resultadoParcial[2] = calculoMediaReal(monitor->subMatriz, monitor->indiceUltimo); //------------------------------------------Modificar a calculo real!!!!!
+		resultadoParcial[3] = calculoMediaImaginaria(monitor->subMatriz, monitor->indiceUltimo);//-------------------------------------Modificar a calculo real!!!!!
 		//Escribir en la estructura correspondiente y guardar en el monitor con la estructura Manejo parcial
 		for (int i = 0; i < 5; i++){
-			comun.resultadoTotalDiscos[monitor.idMonitor][i] += resultadoParcial[i];
+			comun->resultadoTotalDiscos[monitor->idMonitor][i] += resultadoParcial[i];
 		}
 		//Vaciar submatriz y reestablecer los datos del monitor
 		for (int i = 0; i < buffer; i++){
-			cfree(monitor.subMatriz[i]);
+			free(monitor->subMatriz[i]);
 		}
-		cfree(monitor.subMatriz);
-		monitor.indiceUltimo = 0;
+		free(monitor->subMatriz);
+		monitor->indiceUltimo = 0;
 
 		//Liberar la hebra
 		pthread_cond_signal(&monitor->notFull);
@@ -100,7 +101,6 @@ void asignarDataMonitores(){
     int largo = 0;
 	archivoEntrada=fopen(archivoVisibilidades,"r");
 	char c;
-	int datos;
 	while((c = fgetc(archivoEntrada)) != EOF){
 		if(c == '\n'){
 			largo++;
@@ -146,29 +146,29 @@ void asignarDataMonitores(){
 						indiceDiscAsignado = j;
 					}
 				}
-				if (indiceDiscAsignado = -1){
+				if (indiceDiscAsignado == -1){
 					indiceDiscAsignado = cantDiscos -1;
 				}
 				//con este for identificamos el monitor que debemos usar
 				if(listaMonitores[indiceDiscAsignado].indiceUltimo < buffer){
-					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores.indiceUltimo][0]=posU;
-					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores.indiceUltimo][1]=posV;
-					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores.indiceUltimo][2]=posR;
-					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores.indiceUltimo][3]=posI;
-					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores.indiceUltimo][4]=posRU;
-					listaMonitores.indiceUltimo+=1;
+					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][0]=posU;
+					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][1]=posV;
+					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][2]=posR;
+					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][3]=posI;
+					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][4]=posRU;
+					listaMonitores->indiceUltimo+=1;
 				}
 				// se termina la produccion
 				if(listaMonitores[indiceDiscAsignado].indiceUltimo == buffer){//el buffer queda lleno
 					//bloqueamos el mutex del monitor
-					pthread_mutex_lock (&listaMonitores[indiceDiscAsignado]->mutex);
+					pthread_mutex_lock (&listaMonitores[indiceDiscAsignado].mutex);
 					//mientras este lleno se bloquea
-					while (buffer->full) {
-						pthread_cond_wait (&listaMonitores[indiceDiscAsignado]->notFull, &listaMonitores[indiceDiscAsignado]->mutex);
+					while (listaMonitores[indiceDiscAsignado].full) {
+						pthread_cond_wait (&listaMonitores[indiceDiscAsignado].notFull, &listaMonitores[indiceDiscAsignado].mutex);
 					}
 					//se libera el monitor correspondiente que ya previamente vacia el buffer del monitor y permite proceder la lectura
-					pthread_cond_signal(&listaMonitores[indiceDiscAsignado]->notEmpty);
-					pthread_mutex_unlock(&listaMonitores[indiceDiscAsignado]->mutex);
+					pthread_cond_signal(&listaMonitores[indiceDiscAsignado].notEmpty);
+					pthread_mutex_unlock(&listaMonitores[indiceDiscAsignado].mutex);
 				}	
 				
 				
@@ -184,11 +184,11 @@ void crearMonitores(){
     //crear monitor
     listaMonitores = (Monitor*)calloc(sizeof(Monitor),cantDiscos);
     for(int i=0;i<cantDiscos;i++){
-    	pthread_mutex_init(&listaMonitores[i]->mutex, NULL);
-    	pthread_cond_init(&listaMonitores[i]->notFull, NULL);
-    	pthread_cond_init(&listaMonitores[i]->notEmpty, NULL);
+    	pthread_mutex_init(&listaMonitores[i].mutex, NULL);
+    	pthread_cond_init(&listaMonitores[i].notFull, NULL);
+    	pthread_cond_init(&listaMonitores[i].notEmpty, NULL);
     	listaMonitores[i].indiceUltimo=0;
-    	listaMonitores[i].tamañoBUffer=buffer;
+    	listaMonitores[i].tamanoBUffer=buffer;
 		listaMonitores[i].idMonitor=i+1;
     	listaMonitores[i].subMatriz=(float**)calloc(sizeof(float*),buffer);
     	for(int j=0;j<5;j++){
@@ -199,11 +199,11 @@ void crearMonitores(){
 
 
 void iniciarEstructuraComun(){
-	comun.resultadoTotalDiscos = (float**)calloc(sizeof(float*),cantDiscos);
+	comun->resultadoTotalDiscos = (float**)calloc(sizeof(float*),cantDiscos);
     for (int i = 0; i < cantDiscos; i++){
-        comun.resultadoTotalDiscos[i] = (float*)calloc(sizeof(float),5);
+        comun->resultadoTotalDiscos[i] = (float*)calloc(sizeof(float),5);
 		for (int j = 0; j < 5; j++){
-			comun.resultadoTotalDiscos[i][j]= 0;
+			comun->resultadoTotalDiscos[i][j]= 0;
 		}
     }
 }
