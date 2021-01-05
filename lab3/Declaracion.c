@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <pthread.h>
-#include<stdbool.h>
+#include <stdbool.h>
 
 #include "Declaracion.h"
 /*
@@ -199,6 +199,7 @@ void crearMonitores(){
 
 
 void iniciarEstructuraComun(){
+	printf("\n HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 	comun->resultadoTotalDiscos = (float**)calloc(sizeof(float*),cantDiscos);
     for (int i = 0; i < cantDiscos; i++){
         comun->resultadoTotalDiscos[i] = (float*)calloc(sizeof(float),5);
