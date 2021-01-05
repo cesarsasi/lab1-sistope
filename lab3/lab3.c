@@ -129,16 +129,13 @@ int main(int argc, char** argv){
 
     
 	//Crear y ejecutar hebras de discos
-    pthread_t *hebras;
-    hebras = (pthread_t*)calloc(sizeof(pthread_t),cantDiscos);
-    printf("GOOOOL");
+    pthread_t hebras[cantDiscos];
     for(int i= 0; i<cantDiscos;i++){
-        pthread_create(&hebras[i],NULL,calculador, &listaMonitores[i]);
-        
+        pthread_create(&hebras[i],NULL,calculador, (void*)&listaMonitores[i]);
     }
     
 	//Lectura de lineas y asignacion de variables al monitor
-	//asignarDataMonitores();
+	asignarDataMonitores();
     
     //Juntar resultados en las hebras y mandarlo a la estructura de resultado total
     for(int i=0; i < cantDiscos;i++){

@@ -66,9 +66,10 @@ float calculoMediaImaginaria(float ** matriz, int largo){
 //*******************************************************************************************************************************
 //Calculador reune las funciones.h y las ejecuta 
 void * calculador(void * monitorVoid){
-	printf("HOLAAA WASHOSSS");
+	
 	Monitor * monitor = (Monitor *)monitorVoid;
-	while(true){
+	printf("\n HOLAAA WASHOSSS %d",monitor->idMonitor);
+	/*while(true){
 		//si ya esta tomado el mutex la hebra se bloquea
 		pthread_mutex_lock (&monitor->mutex);
 		//si el monitor no llena buffer no se ejecuta lo que continua despues del while
@@ -95,7 +96,8 @@ void * calculador(void * monitorVoid){
 		//Liberar la hebra
 		pthread_cond_signal(&monitor->notFull);
 		pthread_mutex_unlock(&monitor->mutex);
-	}
+	}*/
+	pthread_exit(NULL);
 }
 
 void asignarDataMonitores(){
@@ -108,80 +110,78 @@ void asignarDataMonitores(){
 		}
 	}
 	fclose(archivoEntrada);
-	/*
 	printf("\n largo archivo %d \n", largo);
 	float **archivoGuardado = (float **)calloc(sizeof(float*), largo);
 	for(int i=0; i<largo;i++){
 		archivoGuardado[i]=(float*)calloc(sizeof(float),5);
 	}
-
 	
 	float posU, posV,posR,posI,posRU;
 	archivoEntrada=fopen(archivoVisibilidades,"r");
-	while(true){
+	for(int i=0; i<largo;i++){
+		for(int j=0;j<5;j++){
+			fscanf(archivoEntrada, "%f", &posU);
+			c=fgetc(archivoEntrada);
+			fscanf(archivoEntrada, "%f", &posV);
+			c=fgetc(archivoEntrada);
+			
+			fscanf(archivoEntrada, "%f", &posR);
+			c=fgetc(archivoEntrada);
 
-		for(int i=0; i<largo;i++){
-			for(int j=0;j<5;j++){
-				fscanf(archivoEntrada, "%f", &posU);
-				c=fgetc(archivoEntrada);
+			fscanf(archivoEntrada, "%f", &posI);
+			c=fgetc(archivoEntrada);
 
-				fscanf(archivoEntrada, "%f", &posV);
-				c=fgetc(archivoEntrada);
-				
-				fscanf(archivoEntrada, "%f", &posR);
-				c=fgetc(archivoEntrada);
+			fscanf(archivoEntrada, "%f", &posRU);
+			c=fgetc(archivoEntrada);
+			
+			//Productor calcula propiedades del consumidor y consumidor es el que procesa
+			//Distribucion y como identificar cuando un punto va a un monitor
+			
+			//Obtenemos su distancia del centro}
+			float sumPot = pow(posU,2) + pow(posV,2);
 
-				fscanf(archivoEntrada, "%f", &posI);
-				c=fgetc(archivoEntrada);
-
-				fscanf(archivoEntrada, "%f", &posRU);
-				c=fgetc(archivoEntrada);
-				
-				//Productor calcula propiedades del consumidor y consumidor es el que procesa
-				//Distribucion y como identificar cuando un punto va a un monitor
-				
-				//Obtenemos su distancia del centro}
-				float sumPot = pow(posU,2) + pow(posV,2);
-				float dist = sqrt(sumPot);
-				//calculamos en que disco queda asignada (indice del monitor en el arreglo)
-				int indiceDiscAsignado = -1;
-				for (int j = 0; j < cantDiscos; ++j){
-					if( (anchoDiscos*j)<=dist && (anchoDiscos*j)+anchoDiscos>dist){
-						indiceDiscAsignado = j;
-					}
+			printf("\n %f,%f ",posU,posV);
+			float dist = sqrt(sumPot);
+			printf("\n %f ------Dist",dist);
+			//calculamos en que disco queda asignada (indice del monitor en el arreglo)
+			int indiceDiscAsignado = -1;
+			for (int j = 0; j < cantDiscos; ++j){
+				if( (anchoDiscos*j)<=dist && (anchoDiscos*j)+anchoDiscos>dist){
+					indiceDiscAsignado = j;
 				}
-				if (indiceDiscAsignado == -1){
-					indiceDiscAsignado = cantDiscos -1;
-				}
-				//con este for identificamos el monitor que debemos usar
-				if(listaMonitores[indiceDiscAsignado].indiceUltimo < buffer){
-					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][0]=posU;
-					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][1]=posV;
-					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][2]=posR;
-					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][3]=posI;
-					listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][4]=posRU;
-					listaMonitores->indiceUltimo+=1;
-				}
-				// se termina la produccion
-				if(listaMonitores[indiceDiscAsignado].indiceUltimo == buffer){//el buffer queda lleno
-					//bloqueamos el mutex del monitor
-					pthread_mutex_lock (&listaMonitores[indiceDiscAsignado].mutex);
-					//mientras este lleno se bloquea
-					while (listaMonitores[indiceDiscAsignado].full) {
-						pthread_cond_wait (&listaMonitores[indiceDiscAsignado].notFull, &listaMonitores[indiceDiscAsignado].mutex);
-					}
-					//se libera el monitor correspondiente que ya previamente vacia el buffer del monitor y permite proceder la lectura
-					pthread_cond_signal(&listaMonitores[indiceDiscAsignado].notEmpty);
-					pthread_mutex_unlock(&listaMonitores[indiceDiscAsignado].mutex);
-				}	
-				
-				
 			}
+			if (indiceDiscAsignado == -1){
+				indiceDiscAsignado = cantDiscos -1;
+			}
+			//con este for identificamos el monitor que debemos usar
+			if(listaMonitores[indiceDiscAsignado].indiceUltimo < buffer){
+				listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][0]=posU;
+				listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][1]=posV;
+				listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][2]=posR;
+				listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][3]=posI;
+				listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][4]=posRU;
+				listaMonitores->indiceUltimo+=1;
+			}/*
+			// se termina la produccion
+			if(listaMonitores[indiceDiscAsignado].indiceUltimo == buffer){//el buffer queda lleno
+				//bloqueamos el mutex del monitor
+				pthread_mutex_lock (&listaMonitores[indiceDiscAsignado].mutex);
+				//mientras este lleno se bloquea
+				while (listaMonitores[indiceDiscAsignado].full) {
+					pthread_cond_wait (&listaMonitores[indiceDiscAsignado].notFull, &listaMonitores[indiceDiscAsignado].mutex);
+				}
+				//se libera el monitor correspondiente que ya previamente vacia el buffer del monitor y permite proceder la lectura
+				pthread_cond_signal(&listaMonitores[indiceDiscAsignado].notEmpty);
+				pthread_mutex_unlock(&listaMonitores[indiceDiscAsignado].mutex);
+			}	*/
+			
+			
 		}
-	//Leer lineas que quedan washitas
 	}
+	//Leer lineas que quedan washitas
+	
 	fclose(archivoEntrada);
-	*/
+	
 
 }
 
