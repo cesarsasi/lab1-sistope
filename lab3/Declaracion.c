@@ -66,7 +66,7 @@ float calculoMediaImaginaria(float ** matriz, int largo){
 //*******************************************************************************************************************************
 //Calculador reune las funciones.h y las ejecuta 
 void * calculador(void * monitorVoid){
-	
+	printf("HOLAAA WASHOSSS");
 	Monitor * monitor = (Monitor *)monitorVoid;
 	while(true){
 		//si ya esta tomado el mutex la hebra se bloquea
@@ -108,11 +108,14 @@ void asignarDataMonitores(){
 		}
 	}
 	fclose(archivoEntrada);
+	/*
 	printf("\n largo archivo %d \n", largo);
 	float **archivoGuardado = (float **)calloc(sizeof(float*), largo);
 	for(int i=0; i<largo;i++){
 		archivoGuardado[i]=(float*)calloc(sizeof(float),5);
 	}
+
+	
 	float posU, posV,posR,posI,posRU;
 	archivoEntrada=fopen(archivoVisibilidades,"r");
 	while(true){
@@ -178,6 +181,7 @@ void asignarDataMonitores(){
 	//Leer lineas que quedan washitas
 	}
 	fclose(archivoEntrada);
+	*/
 
 }
 
