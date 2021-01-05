@@ -157,12 +157,14 @@ void asignarDataMonitores(){
 		//con este for identificamos el monitor que debemos usar
 		
 		if(listaMonitores[indiceDiscAsignado].indiceUltimo < buffer){
-			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores[indiceDiscAsignado].indiceUltimo][0]=posU;
-			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores[indiceDiscAsignado].indiceUltimo][1]=posV;
-			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores[indiceDiscAsignado].indiceUltimo][2]=posR;
-			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores[indiceDiscAsignado].indiceUltimo][3]=posI;
-			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores[indiceDiscAsignado].indiceUltimo][4]=posRU;
-			listaMonitores[indiceDiscAsignado].indiceUltimo += 1;
+			int indice=listaMonitores[indiceDiscAsignado].indiceUltimo;
+			listaMonitores[indiceDiscAsignado].subMatriz[indice][0]= posU;
+			listaMonitores[indiceDiscAsignado].subMatriz[indice][1]= posV;
+			listaMonitores[indiceDiscAsignado].subMatriz[indice][2]= posR;
+			listaMonitores[indiceDiscAsignado].subMatriz[indice][3]= posI;
+			listaMonitores[indiceDiscAsignado].subMatriz[indice][4]= posRU;
+			listaMonitores[indiceDiscAsignado].indiceUltimo = indice+1;
+			printf("\n %d ------------------------------    INDICE",listaMonitores[indiceDiscAsignado].indiceUltimo);
 			
 			
 		}
@@ -198,10 +200,17 @@ void crearMonitores(){
     	listaMonitores[i].tamanoBUffer=buffer;
 		listaMonitores[i].idMonitor=i+1;
     	listaMonitores[i].subMatriz=(float**)calloc(sizeof(float*),buffer);
-    	for(int j=0;j<5;j++){
+    	for(int j=0;j<buffer;j++){
     		listaMonitores[i].subMatriz[j]=(float*)calloc(sizeof(float),5);
     	}
     }
+	for(int i=0;i<cantDiscos;i++){
+		for(int j=0;j<buffer;j++){
+			for(int k=0;k<5;k++){
+				listaMonitores[i].subMatriz[j][k] = 0.0;
+			}
+		}
+	}
 }
 
 
