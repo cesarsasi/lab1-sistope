@@ -15,6 +15,7 @@
 3 i
 4 w */
 
+//FUNCIONES-------------------------------------------------------------------------------------------------------------------------
 void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int mediaImag, int potencia, int ruidoTotal){
     FILE* fileFinal = fopen(archivoFinal, "a");
     fprintf(fileFinal,"Disco: %d",idDisco);
@@ -82,13 +83,13 @@ void * calculador(void * monitorVoid){
 		resultadoParcial[3] = calculoMediaImaginaria(monitor->subMatriz, monitor->indiceUltimo);//-------------------------------------Modificar a calculo real!!!!!
 		//Escribir en la estructura correspondiente y guardar en el monitor con la estructura Manejo parcial
 		for (int i = 0; i < 5; i++){
-			comun->resultadoTotalDiscos[monitor->idMonitor][i] += resultadoParcial[i];
+			comun.resultadoTotalDiscos[monitor->idMonitor][i] += resultadoParcial[i];
 		}
 		//Vaciar submatriz y reestablecer los datos del monitor
 		for (int i = 0; i < buffer; i++){
-			free(monitor->subMatriz[i]);
+			//free(monitor->subMatriz[i]);
 		}
-		free(monitor->subMatriz);
+		//free(monitor->subMatriz);
 		monitor->indiceUltimo = 0;
 
 		//Liberar la hebra
@@ -199,14 +200,14 @@ void crearMonitores(){
 
 
 void iniciarEstructuraComun(){
-	printf("\n HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-	comun->resultadoTotalDiscos = (float**)calloc(sizeof(float*),cantDiscos);
+	comun.resultadoTotalDiscos = (float**)calloc(sizeof(float*),cantDiscos);
     for (int i = 0; i < cantDiscos; i++){
-        comun->resultadoTotalDiscos[i] = (float*)calloc(sizeof(float),5);
+        comun.resultadoTotalDiscos[i] = (float*)calloc(sizeof(float),5);
 		for (int j = 0; j < 5; j++){
-			comun->resultadoTotalDiscos[i][j]= 0;
+			comun.resultadoTotalDiscos[i][j]= 0;
 		}
     }
+    
 }
 
 
@@ -218,3 +219,4 @@ void iniciarEstructuraComun(){
         }
         printf("\n");
     }*/ 
+//FUNCIONES-------------------------------------------------------------------------------------------------------------------------

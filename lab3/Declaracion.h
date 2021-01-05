@@ -1,6 +1,8 @@
 #ifndef Declaracion_h_
 #define Declaracion_h_
 //Declaracion de estructuras a utilizar
+//DECLARACION-------------------------------------------------------------------------------------------------------------------------
+//Declaracion de estructuras a utilizar
 typedef struct monitor{
 	float **subMatriz;
 	int indiceUltimo;
@@ -18,7 +20,7 @@ typedef struct comun{
 //Declaracion de variables globales a utilizar en el laboratorio
 FILE *archivoEntrada;
 Monitor *listaMonitores;
-Comun *comun;
+Comun comun;
 char *mflag, *archivoVisibilidades, *archivoSalida;
 int d,cantDiscos,buffer,anchoDiscos,flag;
 int terminoLectura ;
@@ -34,5 +36,5 @@ void *calculador(void * monitorVoid);
 void asignarDataMonitores();
 void crearMonitores();
 void iniciarEstructuraComun();
-
+//DECLARACION-------------------------------------------------------------------------------------------------------------------------
 #endif
