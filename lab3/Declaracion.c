@@ -139,9 +139,9 @@ void asignarDataMonitores(){
 		//Obtenemos su distancia del centro}
 		float sumPot = pow(posU,2) + pow(posV,2);
 
-		printf("\n %f,%f ",posU,posV);
+		//printf("\n %f,%f ",posU,posV);
 		float dist = sqrt(sumPot);
-		printf("\n %f ------Dist",dist);
+		//printf("\n %f ------Dist",dist);
 		//calculamos en que disco queda asignada (indice del monitor en el arreglo)
 		int indiceDiscAsignado = -1;
 		for (int j = 0; j < cantDiscos; ++j){
@@ -153,16 +153,20 @@ void asignarDataMonitores(){
 			indiceDiscAsignado = cantDiscos -1;
 		}
 
-		printf("\n %d ------------------------------    INDICE",indiceDiscAsignado);
+		//printf("\n %d ------------------------------    INDICE",indiceDiscAsignado);
 		//con este for identificamos el monitor que debemos usar
+		
 		if(listaMonitores[indiceDiscAsignado].indiceUltimo < buffer){
-			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][0]=posU;
-			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][1]=posV;
-			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][2]=posR;
-			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][3]=posI;
-			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][4]=posRU;
-			listaMonitores[indiceDiscAsignado].indiceUltimo+=1;
-		}/*
+			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores[indiceDiscAsignado].indiceUltimo][0]=posU;
+			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores[indiceDiscAsignado].indiceUltimo][1]=posV;
+			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores[indiceDiscAsignado].indiceUltimo][2]=posR;
+			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores[indiceDiscAsignado].indiceUltimo][3]=posI;
+			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores[indiceDiscAsignado].indiceUltimo][4]=posRU;
+			listaMonitores[indiceDiscAsignado].indiceUltimo += 1;
+			
+			
+		}
+		/*
 		// se termina la produccion
 		if(listaMonitores[indiceDiscAsignado].indiceUltimo == buffer){//el buffer queda lleno
 			//bloqueamos el mutex del monitor
