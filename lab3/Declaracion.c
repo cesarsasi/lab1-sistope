@@ -119,64 +119,62 @@ void asignarDataMonitores(){
 	float posU, posV,posR,posI,posRU;
 	archivoEntrada=fopen(archivoVisibilidades,"r");
 	for(int i=0; i<largo;i++){
-		for(int j=0;j<5;j++){
-			fscanf(archivoEntrada, "%f", &posU);
-			c=fgetc(archivoEntrada);
-			fscanf(archivoEntrada, "%f", &posV);
-			c=fgetc(archivoEntrada);
-			
-			fscanf(archivoEntrada, "%f", &posR);
-			c=fgetc(archivoEntrada);
+		fscanf(archivoEntrada, "%f", &posU);
+		c=fgetc(archivoEntrada);
+		fscanf(archivoEntrada, "%f", &posV);
+		c=fgetc(archivoEntrada);
+		
+		fscanf(archivoEntrada, "%f", &posR);
+		c=fgetc(archivoEntrada);
 
-			fscanf(archivoEntrada, "%f", &posI);
-			c=fgetc(archivoEntrada);
+		fscanf(archivoEntrada, "%f", &posI);
+		c=fgetc(archivoEntrada);
 
-			fscanf(archivoEntrada, "%f", &posRU);
-			c=fgetc(archivoEntrada);
-			
-			//Productor calcula propiedades del consumidor y consumidor es el que procesa
-			//Distribucion y como identificar cuando un punto va a un monitor
-			
-			//Obtenemos su distancia del centro}
-			float sumPot = pow(posU,2) + pow(posV,2);
+		fscanf(archivoEntrada, "%f", &posRU);
+		c=fgetc(archivoEntrada);
+		
+		//Productor calcula propiedades del consumidor y consumidor es el que procesa
+		//Distribucion y como identificar cuando un punto va a un monitor
+		
+		//Obtenemos su distancia del centro}
+		float sumPot = pow(posU,2) + pow(posV,2);
 
-			printf("\n %f,%f ",posU,posV);
-			float dist = sqrt(sumPot);
-			printf("\n %f ------Dist",dist);
-			//calculamos en que disco queda asignada (indice del monitor en el arreglo)
-			int indiceDiscAsignado = -1;
-			for (int j = 0; j < cantDiscos; ++j){
-				if( (anchoDiscos*j)<=dist && (anchoDiscos*j)+anchoDiscos>dist){
-					indiceDiscAsignado = j;
-				}
+		printf("\n %f,%f ",posU,posV);
+		float dist = sqrt(sumPot);
+		printf("\n %f ------Dist",dist);
+		//calculamos en que disco queda asignada (indice del monitor en el arreglo)
+		int indiceDiscAsignado = -1;
+		for (int j = 0; j < cantDiscos; ++j){
+			if( (anchoDiscos*j)<=dist && (anchoDiscos*j)+anchoDiscos>dist){
+				indiceDiscAsignado = j;
 			}
-			if (indiceDiscAsignado == -1){
-				indiceDiscAsignado = cantDiscos -1;
-			}
-			//con este for identificamos el monitor que debemos usar
-			if(listaMonitores[indiceDiscAsignado].indiceUltimo < buffer){
-				listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][0]=posU;
-				listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][1]=posV;
-				listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][2]=posR;
-				listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][3]=posI;
-				listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][4]=posRU;
-				listaMonitores->indiceUltimo+=1;
-			}/*
-			// se termina la produccion
-			if(listaMonitores[indiceDiscAsignado].indiceUltimo == buffer){//el buffer queda lleno
-				//bloqueamos el mutex del monitor
-				pthread_mutex_lock (&listaMonitores[indiceDiscAsignado].mutex);
-				//mientras este lleno se bloquea
-				while (listaMonitores[indiceDiscAsignado].full) {
-					pthread_cond_wait (&listaMonitores[indiceDiscAsignado].notFull, &listaMonitores[indiceDiscAsignado].mutex);
-				}
-				//se libera el monitor correspondiente que ya previamente vacia el buffer del monitor y permite proceder la lectura
-				pthread_cond_signal(&listaMonitores[indiceDiscAsignado].notEmpty);
-				pthread_mutex_unlock(&listaMonitores[indiceDiscAsignado].mutex);
-			}	*/
-			
-			
 		}
+		if (indiceDiscAsignado == -1){
+			indiceDiscAsignado = cantDiscos -1;
+		}
+
+		printf("\n %d ------------------------------    INDICE",indiceDiscAsignado);
+		//con este for identificamos el monitor que debemos usar
+		if(listaMonitores[indiceDiscAsignado].indiceUltimo < buffer){
+			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][0]=posU;
+			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][1]=posV;
+			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][2]=posR;
+			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][3]=posI;
+			listaMonitores[indiceDiscAsignado].subMatriz[listaMonitores->indiceUltimo][4]=posRU;
+			listaMonitores[indiceDiscAsignado].indiceUltimo+=1;
+		}/*
+		// se termina la produccion
+		if(listaMonitores[indiceDiscAsignado].indiceUltimo == buffer){//el buffer queda lleno
+			//bloqueamos el mutex del monitor
+			pthread_mutex_lock (&listaMonitores[indiceDiscAsignado].mutex);
+			//mientras este lleno se bloquea
+			while (listaMonitores[indiceDiscAsignado].full) {
+				pthread_cond_wait (&listaMonitores[indiceDiscAsignado].notFull, &listaMonitores[indiceDiscAsignado].mutex);
+			}
+			//se libera el monitor correspondiente que ya previamente vacia el buffer del monitor y permite proceder la lectura
+			pthread_cond_signal(&listaMonitores[indiceDiscAsignado].notEmpty);
+			pthread_mutex_unlock(&listaMonitores[indiceDiscAsignado].mutex);
+		}	*/
 	}
 	//Leer lineas que quedan washitas
 	
