@@ -1,4 +1,5 @@
-salida_out = lab3
+salida_out = salida
+
 
 salida_headers = Declaracion.h
 salida_source  = $(salida_headers:.h=.c) lab3.c
@@ -12,17 +13,17 @@ depends = .depends
 build : $(salida_out) 
 
 $(salida_out) : $(salida_objects)
-    $(CC) $(CFLAGS) -o $@ $^ -lm -lpthread
+	$(CC) $(CFLAGS) -o $@ $^ -lm -lpthread
 
 $(objects) :
-    $(CC) $(CFLAGS) -c -o $@ $*.c
+	$(CC) $(CFLAGS) -c -o $@ $*.c
 
 $(depends) : $(salida_source) $(salida_headers)
-    @$(CC) -MM $(salida_source) > $@
+	@$(CC) -MM $(salida_source) > $@
 
 
 clean :
-    $(RM) $(salida_out) $(salida_objects) $(zipfile) $(depends)
+	$(RM) $(salida_out) $(salida_objects) $(zipfile) $(depends)
 
 .PHONY : build zip clean
 

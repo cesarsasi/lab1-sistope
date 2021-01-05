@@ -1,0 +1,2 @@
+Declaracion.o: Declaracion.c Declaracion.h
+lab3.o: lab3.c Declaracion.h
