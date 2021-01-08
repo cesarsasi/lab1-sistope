@@ -137,7 +137,6 @@ int main(int argc, char** argv){
     
 	//Lectura de lineas y asignacion de variables al monitor
 	asignarDataMonitores();
-
     /*se printea el seteo de la submatriz
     for(int i=0;i<cantDiscos;i++){
         printf("\n submatriz disco--> %d\n",listaMonitores[i].idMonitor);

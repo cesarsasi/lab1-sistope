@@ -73,7 +73,7 @@ void * calculador(void * monitorVoid){
 	while(true){
 		pthread_mutex_lock (&monitor->mutex);
 		//si el monitor no llena buffer no se ejecuta lo que continua despues del while
-		while (monitor->indiceUltimo<buffer) {
+		while (monitor->indiceUltimo<buffer || monitor->full==1) {
 			pthread_cond_wait (&monitor->notEmpty, &monitor->mutex);
 		}
 		// el buffer esta lleno, por lo tanto se ejecuta la logica del lab
@@ -88,16 +88,16 @@ void * calculador(void * monitorVoid){
 		printf("\n RP3 %lf ",resultadoParcial[2]);
 		printf("\n RP4 %lf ",resultadoParcial[3]);
 		//Escribir en la estructura correspondiente y guardar en el monitor con la estructura Manejo parcial
-		for (int i = 0; i < 5; i++){
+		/*for (int i = 0; i < 5; i++){
 			comun.resultadoTotalDiscos[monitor->idMonitor][i] += resultadoParcial[i];
-		}
+		}*/
 		//Vaciar submatriz y reestablecer los datos del monitor
 		for (int i = 0; i < buffer; i++){
 			//free(monitor->subMatriz[i]);
 		}
 		//free(monitor->subMatriz);
 		monitor->indiceUltimo = 0;
-
+		monitor->full=2;
 		//Liberar la hebra
 		pthread_cond_signal(&monitor->notFull);
 		pthread_mutex_unlock(&monitor->mutex);
@@ -188,6 +188,14 @@ void asignarDataMonitores(){
 		}
 		
 	}
+	for(int i=0;i<cantDiscos;i++){
+		listaMonitores[i].full=1;
+		while (listaMonitores[i].full==1){
+			pthread_cond_signal(&listaMonitores[i].notEmpty);
+			pthread_cond_wait (&listaMonitores[i].notFull, &listaMonitores[i].mutex);
+		}
+		pthread_mutex_unlock(&listaMonitores[i].mutex);
+	}
 	//Leer lineas que quedan washitas
 	
 	fclose(archivoEntrada);
@@ -205,6 +213,7 @@ void crearMonitores(){
     	listaMonitores[i].indiceUltimo=0;
     	listaMonitores[i].tamanoBUffer=buffer;
 		listaMonitores[i].idMonitor=i+1;
+		listaMonitores[i].full=0;
     	listaMonitores[i].subMatriz=(double**)calloc(sizeof(double*),buffer);
     	for(int j=0;j<buffer;j++){
     		listaMonitores[i].subMatriz[j]=(double*)calloc(sizeof(double),5);
