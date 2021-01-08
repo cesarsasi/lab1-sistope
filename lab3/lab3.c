@@ -108,28 +108,19 @@ int main(int argc, char** argv){
     iniciarEstructuraComun();
 
     //MATRIZ ESTRUCTURA COMUN
-    printf("\n");
+    /*printf("\n");
     for(int i=0;i<cantDiscos;i++){
         for(int j=0;j<5;j++){
             printf("%lf",comun.resultadoTotalDiscos[i][j]);
             printf(" ");
         }
         printf("\n");
-    }
+    }*/
     
 	//Crear y Seteamos monitores
-    printf("\nholaaa\n");
+    printf("\n-----------\n");
 	crearMonitores(listaMonitores);
-    //se printea el seteo de la submatriz
-    for(int i=0;i<cantDiscos;i++){
-        printf("\n submatriz disco--> %d\n",listaMonitores[i].idMonitor);
-		for(int j=0;j<buffer;j++){
-			for(int k=0;k<5;k++){
-                printf("%lf ", listaMonitores[i].subMatriz[j][k]);
-			}
-            printf("\n");
-		}
-	}
+    
     //MATRIZ ESTRUCTURA MONITOR
     printf("\n");
     for(int i=0;i<cantDiscos;i++){
@@ -145,7 +136,18 @@ int main(int argc, char** argv){
     }
     
 	//Lectura de lineas y asignacion de variables al monitor
-	//asignarDataMonitores();
+	asignarDataMonitores();
+
+    /*se printea el seteo de la submatriz
+    for(int i=0;i<cantDiscos;i++){
+        printf("\n submatriz disco--> %d\n",listaMonitores[i].idMonitor);
+		for(int j=0;j<buffer;j++){
+			for(int k=0;k<5;k++){
+                printf("%lf ", listaMonitores[i].subMatriz[j][k]);
+			}
+            printf("\n");
+		}
+	}*/
     
     //Juntar resultados en las hebras y mandarlo a la estructura de resultado total
     for(int i=0; i < cantDiscos;i++){
