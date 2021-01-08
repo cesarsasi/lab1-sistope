@@ -115,7 +115,8 @@ int main(int argc, char** argv){
             printf(" ");
         }
         printf("\n");
-    }*/
+    }
+    */
     
 	//Crear y Seteamos monitores
     printf("\n-----------\n");
@@ -147,11 +148,19 @@ int main(int argc, char** argv){
             printf("\n");
 		}
 	}*/
-    printf("\n Finalllll");
+    
     //Juntar resultados en las hebras y mandarlo a la estructura de resultado total
     for(int i=0; i < cantDiscos;i++){
         pthread_join(hebras[i],NULL);
     }
+    printf("\n Finalllll \n");
     printf("\n");
+    for(int i=0;i<cantDiscos;i++){
+        for(int j=0;j<5;j++){
+            printf("%lf",comun.resultadoTotalDiscos[i][j]);
+            printf(" ");
+        }
+        printf("Disco %i \n",i+1);
+    }
 	return 0;
 }

@@ -67,7 +67,6 @@ double calculoMediaImaginaria(double ** matriz, int largo){
 //Calculador reune las funciones.h y las ejecuta 
 void * calculador(void * monitorVoid){
 	Monitor * monitor = (Monitor *)monitorVoid;
-	//printf("\n HOLAAA WASHOSSS %d",monitor->idMonitor);
 	//si ya esta tomado el mutex la hebra se bloquea
 	while(terminoLectura == 0){
 		pthread_mutex_lock (&monitor->mutex);
@@ -77,16 +76,19 @@ void * calculador(void * monitorVoid){
 		}
 		// el buffer esta lleno, por lo tanto se ejecuta la logica del lab
 		double resultadoParcial[4];
-		resultadoParcial[0] = calculoPotenciaParcial(monitor->subMatriz, monitor->indiceUltimo);
-		resultadoParcial[1] = calculoRuidoTotalParcial(monitor->subMatriz, monitor->indiceUltimo);
-		resultadoParcial[2] = calculoMediaReal(monitor->subMatriz, monitor->indiceUltimo);         //-------------------------------------Modificar a calculo real!!!!!
-		resultadoParcial[3] = calculoMediaImaginaria(monitor->subMatriz, monitor->indiceUltimo);   //-------------------------------------Modificar a calculo real!!!!!
+		resultadoParcial[2] = calculoPotenciaParcial(monitor->subMatriz, monitor->indiceUltimo);
+		resultadoParcial[3] = calculoRuidoTotalParcial(monitor->subMatriz, monitor->indiceUltimo);
+		resultadoParcial[0] = calculoMediaReal(monitor->subMatriz, monitor->indiceUltimo);         //-------------------------------------Modificar a calculo real!!!!!
+		resultadoParcial[1] = calculoMediaImaginaria(monitor->subMatriz, monitor->indiceUltimo);   //-------------------------------------Modificar a calculo real!!!!!
 		if (true){
 			printf("\n DISCO %d",monitor->idMonitor);
 			printf("\n RP1 %lf ",resultadoParcial[0]);
 			printf("\n RP2 %lf ",resultadoParcial[1]);
 			printf("\n RP3 %lf ",resultadoParcial[2]);
 			printf("\n RP4 %lf ",resultadoParcial[3]);
+		}
+		for (int i = 0; i < 5; i++){
+			comun.resultadoTotalDiscos[monitor->idMonitor-1][i] += resultadoParcial[i];
 		}
 		//Vaciar submatriz y reestablecer los datos del monitor
 		/*for (int i = 0; i < buffer; i++){
