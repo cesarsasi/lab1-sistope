@@ -66,13 +66,14 @@ double calculoMediaImaginaria(double ** matriz, int largo){
 //*******************************************************************************************************************************
 //Calculador reune las funciones.h y las ejecuta 
 void * calculador(void * monitorVoid){
-	while(true){
+
 		Monitor * monitor = (Monitor *)monitorVoid;
-	//printf("\n HOLAAA WASHOSSS %d",monitor->idMonitor);
+		//printf("\n HOLAAA WASHOSSS %d",monitor->idMonitor);
 		//si ya esta tomado el mutex la hebra se bloquea
+	while(true){
 		pthread_mutex_lock (&monitor->mutex);
 		//si el monitor no llena buffer no se ejecuta lo que continua despues del while
-		while (monitor->empty) {
+		while (monitor->indiceUltimo<buffer) {
 			pthread_cond_wait (&monitor->notEmpty, &monitor->mutex);
 		}
 		// el buffer esta lleno, por lo tanto se ejecuta la logica del lab
@@ -81,6 +82,7 @@ void * calculador(void * monitorVoid){
 		resultadoParcial[1] = calculoRuidoTotalParcial(monitor->subMatriz, monitor->indiceUltimo);
 		resultadoParcial[2] = calculoMediaReal(monitor->subMatriz, monitor->indiceUltimo); //------------------------------------------Modificar a calculo real!!!!!
 		resultadoParcial[3] = calculoMediaImaginaria(monitor->subMatriz, monitor->indiceUltimo);//-------------------------------------Modificar a calculo real!!!!!
+		printf("\n DISCO %d",monitor->idMonitor);
 		printf("\n RP1 %lf ",resultadoParcial[0]);
 		printf("\n RP2 %lf ",resultadoParcial[1]);
 		printf("\n RP3 %lf ",resultadoParcial[2]);
@@ -174,15 +176,17 @@ void asignarDataMonitores(){
 		// se termina la produccion
 		if(listaMonitores[indiceDiscAsignado].indiceUltimo == buffer){//el buffer queda lleno
 			//bloqueamos el mutex del monitor
-			pthread_mutex_lock (&listaMonitores[indiceDiscAsignado].mutex);
+			//pthread_mutex_lock (&listaMonitores[indiceDiscAsignado].mutex);
 			//mientras este lleno se bloquea
-			while (listaMonitores[indiceDiscAsignado].full) {
+			while (listaMonitores[indiceDiscAsignado].indiceUltimo==buffer) {
+				pthread_cond_signal(&listaMonitores[indiceDiscAsignado].notEmpty);
 				pthread_cond_wait (&listaMonitores[indiceDiscAsignado].notFull, &listaMonitores[indiceDiscAsignado].mutex);
 			}
 			//se libera el monitor correspondiente que ya previamente vacia el buffer del monitor y permite proceder la lectura
-			pthread_cond_signal(&listaMonitores[indiceDiscAsignado].notEmpty);
+			//pthread_cond_signal(&listaMonitores[indiceDiscAsignado].notEmpty);
 			pthread_mutex_unlock(&listaMonitores[indiceDiscAsignado].mutex);
 		}
+		
 	}
 	//Leer lineas que quedan washitas
 	
@@ -214,9 +218,9 @@ void crearMonitores(){
 		}
 	}
 	//Bloquear monitor previa creacion de hebra
-	/*for (int i = 0; i < cantDiscos; i++){
-		pthread_mutex_unlock(&listaMonitores[i].mutex);
-	}*/
+	for (int i = 0; i < cantDiscos; i++){
+		pthread_mutex_lock(&listaMonitores[i].mutex);
+	}
 	
 }
 
