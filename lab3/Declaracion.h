@@ -23,7 +23,7 @@ Monitor *listaMonitores;
 Comun comun;
 char *mflag, *archivoVisibilidades, *archivoSalida;
 int d,cantDiscos,buffer,anchoDiscos,flag;
-int terminoLectura ;
+int terminoLectura;
 
 
 //Declaracion de funciones a utilizar en el laboratorio

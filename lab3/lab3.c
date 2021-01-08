@@ -139,7 +139,7 @@ int main(int argc, char** argv){
 	asignarDataMonitores();
     /*se printea el seteo de la submatriz
     for(int i=0;i<cantDiscos;i++){
-        printf("\n submatriz disco--> %d\n",listaMonitores[i].idMonitor);
+        printf("\n submatriz disco--> %d\n", listaMonitores[i].idMonitor);
 		for(int j=0;j<buffer;j++){
 			for(int k=0;k<5;k++){
                 printf("%lf ", listaMonitores[i].subMatriz[j][k]);
@@ -147,11 +147,11 @@ int main(int argc, char** argv){
             printf("\n");
 		}
 	}*/
-    
+    printf("\n Finalllll");
     //Juntar resultados en las hebras y mandarlo a la estructura de resultado total
     for(int i=0; i < cantDiscos;i++){
         pthread_join(hebras[i],NULL);
     }
-
+    printf("\n");
 	return 0;
 }
