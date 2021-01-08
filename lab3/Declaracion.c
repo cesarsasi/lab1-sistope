@@ -76,10 +76,14 @@ void * calculador(void * monitorVoid){
 		}
 		// el buffer esta lleno, por lo tanto se ejecuta la logica del lab
 		double resultadoParcial[4];
-		resultadoParcial[2] = calculoPotenciaParcial(monitor->subMatriz, monitor->indiceUltimo);
-		resultadoParcial[3] = calculoRuidoTotalParcial(monitor->subMatriz, monitor->indiceUltimo);
+		resultadoParcial[0] = 0;
+		resultadoParcial[1] = 0;
+		resultadoParcial[2] = 0;
+		resultadoParcial[3] = 0;
 		resultadoParcial[0] = calculoMediaReal(monitor->subMatriz, monitor->indiceUltimo);         //-------------------------------------Modificar a calculo real!!!!!
 		resultadoParcial[1] = calculoMediaImaginaria(monitor->subMatriz, monitor->indiceUltimo);   //-------------------------------------Modificar a calculo real!!!!!
+		resultadoParcial[2] = calculoPotenciaParcial(monitor->subMatriz, monitor->indiceUltimo);
+		resultadoParcial[3] = calculoRuidoTotalParcial(monitor->subMatriz, monitor->indiceUltimo);
 		/*if (true){
 			printf("\n DISCO %d",monitor->idMonitor);
 			printf("\n RP1 %lf ",resultadoParcial[0]);
@@ -189,7 +193,6 @@ void asignarDataMonitores(){
 		//printf("\n %d ------------------------------    Final",i);
 	}
 	terminoLectura = 1;
-	//printf("333333333333333333333333333333333333333333333333333");
 	for(int i=0;i<cantDiscos;i++){
 		listaMonitores[i].full=1;
 		while (listaMonitores[i].full==1){

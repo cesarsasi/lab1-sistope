@@ -160,7 +160,7 @@ int main(int argc, char** argv){
             printf("%lf",comun.resultadoTotalDiscos[i][j]);
             printf(" ");
         }
-        printf("Disco %i \n",i+1);
+        printf("    Disco %i \n",i+1);
     }
 	return 0;
 }
