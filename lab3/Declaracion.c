@@ -30,7 +30,7 @@ double calculoPotenciaParcial(double ** matriz, int largo){
     for (int i = 0; i < largo; ++i){
         potenciaParcial += pow(matriz[i][2],2) + sqrt(pow(matriz[i][3],2));
     }
-    return potenciaParcial;
+    return potenciaParcial/largo;
 }
 
 double calculoRuidoTotalParcial(double ** matriz, int largo){
@@ -80,14 +80,14 @@ void * calculador(void * monitorVoid){
 		resultadoParcial[3] = calculoRuidoTotalParcial(monitor->subMatriz, monitor->indiceUltimo);
 		resultadoParcial[0] = calculoMediaReal(monitor->subMatriz, monitor->indiceUltimo);         //-------------------------------------Modificar a calculo real!!!!!
 		resultadoParcial[1] = calculoMediaImaginaria(monitor->subMatriz, monitor->indiceUltimo);   //-------------------------------------Modificar a calculo real!!!!!
-		if (true){
+		/*if (true){
 			printf("\n DISCO %d",monitor->idMonitor);
 			printf("\n RP1 %lf ",resultadoParcial[0]);
 			printf("\n RP2 %lf ",resultadoParcial[1]);
 			printf("\n RP3 %lf ",resultadoParcial[2]);
 			printf("\n RP4 %lf ",resultadoParcial[3]);
-		}
-		for (int i = 0; i < 5; i++){
+		}*/
+		for (int i = 0; i < 4; i++){
 			comun.resultadoTotalDiscos[monitor->idMonitor-1][i] += resultadoParcial[i];
 		}
 		//Vaciar submatriz y reestablecer los datos del monitor
@@ -186,10 +186,10 @@ void asignarDataMonitores(){
 			pthread_mutex_unlock(&listaMonitores[indiceDiscAsignado].mutex);
 		}
 		//printf("\n %d ------------------------------    Final",listaMonitores[indiceDiscAsignado].indiceUltimo);
-		printf("\n %d ------------------------------    Final",i);
+		//printf("\n %d ------------------------------    Final",i);
 	}
 	terminoLectura = 1;
-	printf("333333333333333333333333333333333333333333333333333");
+	//printf("333333333333333333333333333333333333333333333333333");
 	for(int i=0;i<cantDiscos;i++){
 		listaMonitores[i].full=1;
 		while (listaMonitores[i].full==1){
@@ -237,8 +237,8 @@ void crearMonitores(){
 void iniciarEstructuraComun(){
 	comun.resultadoTotalDiscos = (double**)calloc(sizeof(double*),cantDiscos);
     for (int i = 0; i < cantDiscos; i++){
-        comun.resultadoTotalDiscos[i] = (double*)calloc(sizeof(double),5);
-		for (int j = 0; j < 5; j++){
+        comun.resultadoTotalDiscos[i] = (double*)calloc(sizeof(double),4);
+		for (int j = 0; j < 4; j++){
 			comun.resultadoTotalDiscos[i][j]= 0;
 		}
     }

@@ -156,7 +156,7 @@ int main(int argc, char** argv){
     printf("\n Finalllll \n");
     printf("\n");
     for(int i=0;i<cantDiscos;i++){
-        for(int j=0;j<5;j++){
+        for(int j=0;j<4;j++){
             printf("%lf",comun.resultadoTotalDiscos[i][j]);
             printf(" ");
         }
