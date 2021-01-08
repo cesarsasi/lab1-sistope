@@ -174,14 +174,14 @@ void asignarDataMonitores(){
 		// se termina la produccion
 		if(listaMonitores[indiceDiscAsignado].indiceUltimo == buffer){//el buffer queda lleno
 			//bloqueamos el mutex del monitor
-			pthread_mutex_unlock (&listaMonitores[indiceDiscAsignado].mutex);
+			pthread_mutex_lock (&listaMonitores[indiceDiscAsignado].mutex);
 			//mientras este lleno se bloquea
 			while (listaMonitores[indiceDiscAsignado].full) {
 				pthread_cond_wait (&listaMonitores[indiceDiscAsignado].notFull, &listaMonitores[indiceDiscAsignado].mutex);
 			}
 			//se libera el monitor correspondiente que ya previamente vacia el buffer del monitor y permite proceder la lectura
 			pthread_cond_signal(&listaMonitores[indiceDiscAsignado].notEmpty);
-			pthread_mutex_lock(&listaMonitores[indiceDiscAsignado].mutex);
+			pthread_mutex_unlock(&listaMonitores[indiceDiscAsignado].mutex);
 		}
 	}
 	//Leer lineas que quedan washitas
@@ -214,9 +214,9 @@ void crearMonitores(){
 		}
 	}
 	//Bloquear monitor previa creacion de hebra
-	for (int i = 0; i < cantDiscos; i++){
-		pthread_mutex_lock(&listaMonitores[i].mutex);
-	}
+	/*for (int i = 0; i < cantDiscos; i++){
+		pthread_mutex_unlock(&listaMonitores[i].mutex);
+	}*/
 	
 }
 
