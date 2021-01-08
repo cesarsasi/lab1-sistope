@@ -4,7 +4,7 @@
 //DECLARACION-------------------------------------------------------------------------------------------------------------------------
 //Declaracion de estructuras a utilizar
 typedef struct monitor{
-	float **subMatriz;
+	double **subMatriz;
 	int indiceUltimo;
 	int tamanoBUffer;
 	int idMonitor;
@@ -14,7 +14,7 @@ typedef struct monitor{
 } Monitor;
 
 typedef struct comun{
-	float ** resultadoTotalDiscos; //Estructura del arreglo [rD1,rD2,.....n] -> (rD1 = [mR,mI,P,R])
+	double ** resultadoTotalDiscos; //Estructura del arreglo [rD1,rD2,.....n] -> (rD1 = [mR,mI,P,R])
 }Comun;
 
 //Declaracion de variables globales a utilizar en el laboratorio
@@ -28,10 +28,10 @@ int terminoLectura ;
 
 //Declaracion de funciones a utilizar en el laboratorio
 void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int mediaImag, int potencia, int ruidoTotal);
-float calculoPotenciaParcial(float ** matriz, int largo);
-float calculoRuidoTotalParcial(float ** matriz, int largo);
-float calculoMediaReal(float ** matriz, int largo);
-float calculoMediaImaginaria(float ** matriz, int largo);
+double calculoPotenciaParcial(double ** matriz, int largo);
+double calculoRuidoTotalParcial(double ** matriz, int largo);
+double calculoMediaReal(double ** matriz, int largo);
+double calculoMediaImaginaria(double ** matriz, int largo);
 void *calculador(void * monitorVoid);
 void asignarDataMonitores();
 void crearMonitores();

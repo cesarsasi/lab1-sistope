@@ -25,16 +25,16 @@ void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int me
     fprintf(fileFinal,"Ruido total %d:",ruidoTotal);
 }
 
-float calculoPotenciaParcial(float ** matriz, int largo){
-    float potenciaParcial = 0;
+double calculoPotenciaParcial(double ** matriz, int largo){
+    double potenciaParcial = 0;
     for (int i = 0; i < largo; ++i){
         potenciaParcial += pow(matriz[i][2],2) + sqrt(pow(matriz[i][3],2));
     }
     return potenciaParcial;
 }
 
-float calculoRuidoTotalParcial(float ** matriz, int largo){
-    float ruidoTotalParcial = 0;
+double calculoRuidoTotalParcial(double ** matriz, int largo){
+    double ruidoTotalParcial = 0;
     for (int i = 0; i < largo; ++i){
         ruidoTotalParcial += matriz[i][4];
     }
@@ -42,10 +42,10 @@ float calculoRuidoTotalParcial(float ** matriz, int largo){
     
 }
 
-float calculoMediaReal(float ** matriz, int largo){
-    float sumaReal=0.0;
-    float largoF= (float)largo;
-    float mediaR;
+double calculoMediaReal(double ** matriz, int largo){
+    double sumaReal=0.0;
+    double largoF= (double)largo;
+    double mediaR;
     for(int i=0;i<largo;i++){
         sumaReal=sumaReal+matriz[i][2];
     }
@@ -53,10 +53,10 @@ float calculoMediaReal(float ** matriz, int largo){
     return mediaR;
 }
 
-float calculoMediaImaginaria(float ** matriz, int largo){
-    float sumaImaginaria =0.0;
-    float largoF=(float)largo;
-    float mediaI;
+double calculoMediaImaginaria(double ** matriz, int largo){
+    double sumaImaginaria =0.0;
+    double largoF=(double)largo;
+    double mediaI;
     for(int i=0;i<largo;i++){
         sumaImaginaria=sumaImaginaria+matriz[i][3];
     }
@@ -77,7 +77,7 @@ void * calculador(void * monitorVoid){
 			pthread_cond_wait (&monitor->notEmpty, &monitor->mutex);
 		}
 		// el buffer esta lleno, por lo tanto se ejecuta la logica del lab
-		float resultadoParcial[4];
+		double resultadoParcial[4];
 		resultadoParcial[0] = calculoPotenciaParcial(monitor->subMatriz, monitor->indiceUltimo);
 		resultadoParcial[1] = calculoRuidoTotalParcial(monitor->subMatriz, monitor->indiceUltimo);
 		resultadoParcial[2] = calculoMediaReal(monitor->subMatriz, monitor->indiceUltimo); //------------------------------------------Modificar a calculo real!!!!!
@@ -111,37 +111,37 @@ void asignarDataMonitores(){
 	}
 	fclose(archivoEntrada);
 	printf("\n largo archivo %d \n", largo);
-	float **archivoGuardado = (float **)calloc(sizeof(float*), largo);
+	double **archivoGuardado = (double **)calloc(sizeof(double*), largo);
 	for(int i=0; i<largo;i++){
-		archivoGuardado[i]=(float*)calloc(sizeof(float),5);
+		archivoGuardado[i]=(double*)calloc(sizeof(double),5);
 	}
 	
-	float posU, posV,posR,posI,posRU;
+	double posU, posV,posR,posI,posRU;
 	archivoEntrada=fopen(archivoVisibilidades,"r");
 	for(int i=0; i<largo;i++){
-		fscanf(archivoEntrada, "%f", &posU);
+		fscanf(archivoEntrada, "%lf", &posU);
 		c=fgetc(archivoEntrada);
-		fscanf(archivoEntrada, "%f", &posV);
+		fscanf(archivoEntrada, "%lf", &posV);
 		c=fgetc(archivoEntrada);
 		
-		fscanf(archivoEntrada, "%f", &posR);
+		fscanf(archivoEntrada, "%lf", &posR);
 		c=fgetc(archivoEntrada);
 
-		fscanf(archivoEntrada, "%f", &posI);
+		fscanf(archivoEntrada, "%lf", &posI);
 		c=fgetc(archivoEntrada);
 
-		fscanf(archivoEntrada, "%f", &posRU);
+		fscanf(archivoEntrada, "%lf", &posRU);
 		c=fgetc(archivoEntrada);
 		
 		//Productor calcula propiedades del consumidor y consumidor es el que procesa
 		//Distribucion y como identificar cuando un punto va a un monitor
 		
 		//Obtenemos su distancia del centro}
-		float sumPot = pow(posU,2) + pow(posV,2);
+		double sumPot = pow(posU,2) + pow(posV,2);
 
-		//printf("\n %f,%f ",posU,posV);
-		float dist = sqrt(sumPot);
-		//printf("\n %f ------Dist",dist);
+		//printf("\n %lf,%lf ",posU,posV);
+		double dist = sqrt(sumPot);
+		//printf("\n %lf ------Dist",dist);
 		//calculamos en que disco queda asignada (indice del monitor en el arreglo)
 		int indiceDiscAsignado = -1;
 		for (int j = 0; j < cantDiscos; ++j){
@@ -199,9 +199,9 @@ void crearMonitores(){
     	listaMonitores[i].indiceUltimo=0;
     	listaMonitores[i].tamanoBUffer=buffer;
 		listaMonitores[i].idMonitor=i+1;
-    	listaMonitores[i].subMatriz=(float**)calloc(sizeof(float*),buffer);
+    	listaMonitores[i].subMatriz=(double**)calloc(sizeof(double*),buffer);
     	for(int j=0;j<buffer;j++){
-    		listaMonitores[i].subMatriz[j]=(float*)calloc(sizeof(float),5);
+    		listaMonitores[i].subMatriz[j]=(double*)calloc(sizeof(double),5);
     	}
     }
 	for(int i=0;i<cantDiscos;i++){
@@ -215,9 +215,9 @@ void crearMonitores(){
 
 
 void iniciarEstructuraComun(){
-	comun.resultadoTotalDiscos = (float**)calloc(sizeof(float*),cantDiscos);
+	comun.resultadoTotalDiscos = (double**)calloc(sizeof(double*),cantDiscos);
     for (int i = 0; i < cantDiscos; i++){
-        comun.resultadoTotalDiscos[i] = (float*)calloc(sizeof(float),5);
+        comun.resultadoTotalDiscos[i] = (double*)calloc(sizeof(double),5);
 		for (int j = 0; j < 5; j++){
 			comun.resultadoTotalDiscos[i][j]= 0;
 		}
@@ -229,7 +229,7 @@ void iniciarEstructuraComun(){
 //Imprimir matriz Prueba
 	/*for(int i=0;i<largo;i++){
         for(int j=0;j<5;j++){
-            printf("%f",archivoGuardado[i][j]);
+            printf("%lf",archivoGuardado[i][j]);
             printf(" ");
         }
         printf("\n");

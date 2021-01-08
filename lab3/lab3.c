@@ -111,7 +111,7 @@ int main(int argc, char** argv){
     printf("\n");
     for(int i=0;i<cantDiscos;i++){
         for(int j=0;j<5;j++){
-            printf("%f",comun.resultadoTotalDiscos[i][j]);
+            printf("%lf",comun.resultadoTotalDiscos[i][j]);
             printf(" ");
         }
         printf("\n");
@@ -125,7 +125,7 @@ int main(int argc, char** argv){
         printf("\n submatriz disco--> %d\n",listaMonitores[i].idMonitor);
 		for(int j=0;j<buffer;j++){
 			for(int k=0;k<5;k++){
-                printf("%f ", listaMonitores[i].subMatriz[j][k]);
+                printf("%lf ", listaMonitores[i].subMatriz[j][k]);
 			}
             printf("\n");
 		}
