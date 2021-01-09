@@ -107,7 +107,11 @@ void * calculador(void * monitorVoid){
 	}
 	pthread_exit(NULL);
 }
-
+/* FUNCION : Genera la lectura y en base a las visibilidades leidas introduce en el monitor de Disco correspondiente segun calculo previo
+ENTRADA: Ninguna, gestiona variables globales.
+SALIDA : Ninguna, gestiona y maneja variables globales.
+OBS    : Funcion a lo que en catedra llamamos Productor, que llama a los consumidores de cada monitor dependiendo sea el caso.
+*/
 void asignarDataMonitores(){
     int largo = 0;
 	archivoEntrada=fopen(archivoVisibilidades,"r");
@@ -197,10 +201,10 @@ void asignarDataMonitores(){
 	}
 	fclose(archivoEntrada);
 }
-/* FUNCION : 
-ENTRADA:
-SALIDA :
-OBS    :
+/* FUNCION : Inicializa la estructura monitor, asigna memoria a las variables correspondientes de cada uno y los settea en cero.
+ENTRADA: Ninguna, maneja puntero tipo Monitor que es variable global
+SALIDA : Ninguna, maneja datos y variables de puntero Monitor.
+OBS    : Es una lista de monitores la que crea
 */
 void crearMonitores(){
     //crear monitor
@@ -231,9 +235,9 @@ void crearMonitores(){
 		}
 	}	
 }
-/* FUNCION : 
-ENTRADA:
-SALIDA :
+/* FUNCION : Inicia y asigna memoria correspondiente para la estructura en la que se almacenaran los resultados finales 
+ENTRADA: Los paramentros que maneja son variables globales
+SALIDA : Ninguna, modifica variables globales
 OBS    :
 */
 void iniciarEstructuraComun(){
