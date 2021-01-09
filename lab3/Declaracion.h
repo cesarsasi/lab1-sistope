@@ -5,7 +5,9 @@
 //Declaracion de estructuras a utilizar
 typedef struct monitor{
 	double **subMatriz;
+	double ** resultadoTotalDiscos;
 	int indiceUltimo;
+	double lineasLeidas;
 	int tamanoBUffer;
 	int idMonitor;
 	int full, empty;
@@ -20,7 +22,7 @@ typedef struct comun{
 //Declaracion de variables globales a utilizar en el laboratorio
 FILE *archivoEntrada;
 Monitor *listaMonitores;
-Comun comun;
+Comun Ecomun;
 char *mflag, *archivoVisibilidades, *archivoSalida;
 int d,cantDiscos,buffer,anchoDiscos,flag;
 int terminoLectura;
@@ -30,8 +32,8 @@ int terminoLectura;
 void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int mediaImag, int potencia, int ruidoTotal);
 double calculoPotenciaParcial(double ** matriz, int largo);
 double calculoRuidoTotalParcial(double ** matriz, int largo);
-double calculoMediaReal(double ** matriz, int largo);
-double calculoMediaImaginaria(double ** matriz, int largo);
+double calculoSumaMediaReal(double ** matriz, int largo);
+double calculoSumaMediaImaginaria(double ** matriz, int largo);
 void *calculador(void * monitorVoid);
 void asignarDataMonitores();
 void crearMonitores();

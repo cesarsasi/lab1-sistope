@@ -28,9 +28,9 @@ void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int me
 double calculoPotenciaParcial(double ** matriz, int largo){
     double potenciaParcial = 0;
     for (int i = 0; i < largo; ++i){
-        potenciaParcial += pow(matriz[i][2],2) + sqrt(pow(matriz[i][3],2));
+        potenciaParcial += sqrt(pow(matriz[i][2],2) + pow(matriz[i][3],2));
     }
-    return potenciaParcial/largo;
+    return potenciaParcial;
 }
 
 double calculoRuidoTotalParcial(double ** matriz, int largo){
@@ -42,26 +42,20 @@ double calculoRuidoTotalParcial(double ** matriz, int largo){
     
 }
 
-double calculoMediaReal(double ** matriz, int largo){
+double calculoSumaMediaReal(double ** matriz, int largo){
     double sumaReal=0.0;
-    double largoF= (double)largo;
-    double mediaR;
     for(int i=0;i<largo;i++){
         sumaReal=sumaReal+matriz[i][2];
     }
-    mediaR = sumaReal/largoF;
-    return mediaR;
+    return sumaReal;
 }
 
-double calculoMediaImaginaria(double ** matriz, int largo){
+double calculoSumaMediaImaginaria(double ** matriz, int largo){
     double sumaImaginaria =0.0;
-    double largoF=(double)largo;
-    double mediaI;
     for(int i=0;i<largo;i++){
         sumaImaginaria=sumaImaginaria+matriz[i][3];
     }
-    mediaI= sumaImaginaria/largoF;
-    return mediaI;
+    return sumaImaginaria;
 }
 //*******************************************************************************************************************************
 //Calculador reune las funciones.h y las ejecuta 
@@ -80,8 +74,8 @@ void * calculador(void * monitorVoid){
 		resultadoParcial[1] = 0;
 		resultadoParcial[2] = 0;
 		resultadoParcial[3] = 0;
-		resultadoParcial[0] = calculoMediaReal(monitor->subMatriz, monitor->indiceUltimo);         //-------------------------------------Modificar a calculo real!!!!!
-		resultadoParcial[1] = calculoMediaImaginaria(monitor->subMatriz, monitor->indiceUltimo);   //-------------------------------------Modificar a calculo real!!!!!
+		resultadoParcial[0] = calculoSumaMediaReal(monitor->subMatriz, monitor->indiceUltimo);         //-------------------------------------Modificar a calculo real!!!!!
+		resultadoParcial[1] = calculoSumaMediaImaginaria(monitor->subMatriz, monitor->indiceUltimo);   //-------------------------------------Modificar a calculo real!!!!!
 		resultadoParcial[2] = calculoPotenciaParcial(monitor->subMatriz, monitor->indiceUltimo);
 		resultadoParcial[3] = calculoRuidoTotalParcial(monitor->subMatriz, monitor->indiceUltimo);
 		/*if (true){
@@ -92,7 +86,7 @@ void * calculador(void * monitorVoid){
 			printf("\n RP4 %lf ",resultadoParcial[3]);
 		}*/
 		for (int i = 0; i < 4; i++){
-			comun.resultadoTotalDiscos[monitor->idMonitor-1][i] += resultadoParcial[i];
+			monitor->resultadoTotalDiscos[monitor->idMonitor-1][i] += resultadoParcial[i];
 		}
 		//Vaciar submatriz y reestablecer los datos del monitor
 		/*for (int i = 0; i < buffer; i++){
@@ -173,6 +167,7 @@ void asignarDataMonitores(){
 			listaMonitores[indiceDiscAsignado].subMatriz[indice][3]= posI;
 			listaMonitores[indiceDiscAsignado].subMatriz[indice][4]= posRU;
 			listaMonitores[indiceDiscAsignado].indiceUltimo = indice+1;
+			listaMonitores[indiceDiscAsignado].lineasLeidas+=1;
 			//printf("\n %d ------------------------------    INDICE",listaMonitores[indiceDiscAsignado].indiceUltimo);
 		}
 		
@@ -201,7 +196,14 @@ void asignarDataMonitores(){
 		}
 		pthread_mutex_unlock(&listaMonitores[i].mutex);
 	}
-	//Leer lineas que quedan washitas
+	//termina hebra se escribe en comun
+	for(int i=0;i<cantDiscos;i++){
+		Ecomun.resultadoTotalDiscos[i][0]= listaMonitores[i].resultadoTotalDiscos[i][0]/listaMonitores[i].lineasLeidas;//media real
+		Ecomun.resultadoTotalDiscos[i][1]= listaMonitores[i].resultadoTotalDiscos[i][1]/listaMonitores[i].lineasLeidas;//media imaginaria
+		Ecomun.resultadoTotalDiscos[i][2]= listaMonitores[i].resultadoTotalDiscos[i][2];//potencia par
+		Ecomun.resultadoTotalDiscos[i][3]= listaMonitores[i].resultadoTotalDiscos[i][3];//ruido
+		
+	}
 	fclose(archivoEntrada);
 	
 }
@@ -217,10 +219,15 @@ void crearMonitores(){
     	listaMonitores[i].tamanoBUffer=buffer;
 		listaMonitores[i].idMonitor=i+1;
 		listaMonitores[i].full=0;
+		listaMonitores[i].lineasLeidas=0;
     	listaMonitores[i].subMatriz=(double**)calloc(sizeof(double*),buffer);
     	for(int j=0;j<buffer;j++){
     		listaMonitores[i].subMatriz[j]=(double*)calloc(sizeof(double),5);
     	}
+		listaMonitores[i].resultadoTotalDiscos = (double**)calloc(sizeof(double*),cantDiscos);
+		for (int j = 0; j < cantDiscos; j++){
+			listaMonitores[i].resultadoTotalDiscos[j] = (double*)calloc(sizeof(double),4);
+		}
     }
 	for(int i=0;i<cantDiscos;i++){
 		for(int j=0;j<buffer;j++){
@@ -228,21 +235,16 @@ void crearMonitores(){
 				listaMonitores[i].subMatriz[j][k] = 0.0;
 			}
 		}
-	}
-	//Bloquear monitor previa creacion de hebra
-	for (int i = 0; i < cantDiscos; i++){
-		//pthread_mutex_lock(&listaMonitores[i].mutex);
-	}
-	
+	}	
 }
 
 
 void iniciarEstructuraComun(){
-	comun.resultadoTotalDiscos = (double**)calloc(sizeof(double*),cantDiscos);
+	Ecomun.resultadoTotalDiscos = (double**)calloc(sizeof(double*),cantDiscos);
     for (int i = 0; i < cantDiscos; i++){
-        comun.resultadoTotalDiscos[i] = (double*)calloc(sizeof(double),4);
+        Ecomun.resultadoTotalDiscos[i] = (double*)calloc(sizeof(double),4);
 		for (int j = 0; j < 4; j++){
-			comun.resultadoTotalDiscos[i][j]= 0;
+			Ecomun.resultadoTotalDiscos[i][j]= 0;
 		}
     }
     

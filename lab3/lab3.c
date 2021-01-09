@@ -157,10 +157,13 @@ int main(int argc, char** argv){
     printf("\n");
     for(int i=0;i<cantDiscos;i++){
         for(int j=0;j<4;j++){
-            printf("%lf",comun.resultadoTotalDiscos[i][j]);
+            printf("%lf",Ecomun.resultadoTotalDiscos[i][j]);
             printf(" ");
         }
         printf("    Disco %i \n",i+1);
+    }
+    for(int i=0;i<cantDiscos;i++){
+        printf("\nLineas leidas por el disco %d --> %lf\n",listaMonitores[i].idMonitor,listaMonitores[i].lineasLeidas);
     }
 	return 0;
 }
