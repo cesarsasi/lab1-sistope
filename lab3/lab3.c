@@ -8,9 +8,12 @@
 #include<stdbool.h>
 
 #include "Declaracion.h"
-
+/* FUNCION : Principal, gestiona el llamado de la lectura y a su vez del productor
+ENTRADA: Parametros ingresados por usuario al momento de ejecutar el programa, tales como (ver observaciones).
+SALIDA : Retorno a 0 al terminar el programa
+OBS    :
 // ./lab3 -i prueba1.csv -o propiedades.txt -d 100 -n 4 -s 10 -b
-
+*/
 int main(int argc, char** argv){
 	//Lectura parametros desde la terminal
     flag=0;
@@ -97,73 +100,25 @@ int main(int argc, char** argv){
             break;
         }     
     }
-    printf("\n i - %s",archivoVisibilidades);
-    printf("\n o - %s",archivoSalida);
-    printf("\n d - %d",anchoDiscos);
-    printf("\n n - %d",cantDiscos);
-    printf("\n s - %d",buffer);
-    printf("\n b - %d",flag);
-    
     //Inicializar estructura para resultados totales (comun)
     iniciarEstructuraComun();
-
-    //MATRIZ ESTRUCTURA COMUN
-    /*printf("\n");
-    for(int i=0;i<cantDiscos;i++){
-        for(int j=0;j<5;j++){
-            printf("%lf",comun.resultadoTotalDiscos[i][j]);
-            printf(" ");
-        }
-        printf("\n");
-    }
-    */
-    
 	//Crear y Seteamos monitores
-    printf("\n-----------\n");
 	crearMonitores(listaMonitores);
-    
-    //MATRIZ ESTRUCTURA MONITOR
-    printf("\n");
-    for(int i=0;i<cantDiscos;i++){
-        printf("%d %d %d",listaMonitores[i].indiceUltimo,listaMonitores[i].tamanoBUffer, listaMonitores[i].idMonitor);
-        printf("\n");
-    }
-
-    
 	//Crear y ejecutar hebras de discos
     pthread_t hebras[cantDiscos];
     for(int i= 0; i<cantDiscos;i++){
         pthread_create(&hebras[i],NULL,calculador, (void*)&listaMonitores[i]);
     }
-    
 	//Lectura de lineas y asignacion de variables al monitor
 	asignarDataMonitores();
-    /*se printea el seteo de la submatriz
-    for(int i=0;i<cantDiscos;i++){
-        printf("\n submatriz disco--> %d\n", listaMonitores[i].idMonitor);
-		for(int j=0;j<buffer;j++){
-			for(int k=0;k<5;k++){
-                printf("%lf ", listaMonitores[i].subMatriz[j][k]);
-			}
-            printf("\n");
-		}
-	}*/
-    
     //Juntar resultados en las hebras y mandarlo a la estructura de resultado total
     for(int i=0; i < cantDiscos;i++){
         pthread_join(hebras[i],NULL);
     }
-    printf("\n Finalllll \n");
-    printf("\n");
-    for(int i=0;i<cantDiscos;i++){
-        for(int j=0;j<4;j++){
-            printf("%lf",Ecomun.resultadoTotalDiscos[i][j]);
-            printf(" ");
+    if (flag == 1){
+        for(int i=0;i<cantDiscos;i++){
+            printf("\nLineas leidas por el disco %d --> %lf\n",listaMonitores[i].idMonitor,listaMonitores[i].lineasLeidas);
         }
-        printf("    Disco %i \n",i+1);
-    }
-    for(int i=0;i<cantDiscos;i++){
-        printf("\nLineas leidas por el disco %d --> %lf\n",listaMonitores[i].idMonitor,listaMonitores[i].lineasLeidas);
     }
 	return 0;
 }

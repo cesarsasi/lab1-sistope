@@ -15,7 +15,11 @@
 3 i
 4 w */
 
-//FUNCIONES-------------------------------------------------------------------------------------------------------------------------
+/* FUNCION : 
+ENTRADA:
+SALIDA :
+OBS    :
+*/
 void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int mediaImag, int potencia, int ruidoTotal){
     FILE* fileFinal = fopen(archivoFinal, "a");
     fprintf(fileFinal,"Disco: %d",idDisco);
@@ -24,7 +28,11 @@ void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int me
     fprintf(fileFinal,"Potencia: %d",potencia);
     fprintf(fileFinal,"Ruido total %d:",ruidoTotal);
 }
-
+/* FUNCION : 
+ENTRADA:
+SALIDA :
+OBS    :
+*/
 double calculoPotenciaParcial(double ** matriz, int largo){
     double potenciaParcial = 0;
     for (int i = 0; i < largo; ++i){
@@ -32,16 +40,23 @@ double calculoPotenciaParcial(double ** matriz, int largo){
     }
     return potenciaParcial;
 }
-
+/* FUNCION : 
+ENTRADA:
+SALIDA :
+OBS    :
+*/
 double calculoRuidoTotalParcial(double ** matriz, int largo){
     double ruidoTotalParcial = 0;
     for (int i = 0; i < largo; ++i){
         ruidoTotalParcial += matriz[i][4];
     }
     return ruidoTotalParcial;
-    
 }
-
+/* FUNCION : 
+ENTRADA:
+SALIDA :
+OBS    :
+*/
 double calculoSumaMediaReal(double ** matriz, int largo){
     double sumaReal=0.0;
     for(int i=0;i<largo;i++){
@@ -49,7 +64,11 @@ double calculoSumaMediaReal(double ** matriz, int largo){
     }
     return sumaReal;
 }
-
+/* FUNCION : 
+ENTRADA:
+SALIDA :
+OBS    :
+*/
 double calculoSumaMediaImaginaria(double ** matriz, int largo){
     double sumaImaginaria =0.0;
     for(int i=0;i<largo;i++){
@@ -57,8 +76,11 @@ double calculoSumaMediaImaginaria(double ** matriz, int largo){
     }
     return sumaImaginaria;
 }
-//*******************************************************************************************************************************
-//Calculador reune las funciones.h y las ejecuta 
+/* FUNCION : 
+ENTRADA:
+SALIDA :
+OBS    : Calculador reune las funciones.h y las ejecuta 
+*/
 void * calculador(void * monitorVoid){
 	Monitor * monitor = (Monitor *)monitorVoid;
 	//si ya esta tomado el mutex la hebra se bloquea
@@ -78,21 +100,10 @@ void * calculador(void * monitorVoid){
 		resultadoParcial[1] = calculoSumaMediaImaginaria(monitor->subMatriz, monitor->indiceUltimo);   //-------------------------------------Modificar a calculo real!!!!!
 		resultadoParcial[2] = calculoPotenciaParcial(monitor->subMatriz, monitor->indiceUltimo);
 		resultadoParcial[3] = calculoRuidoTotalParcial(monitor->subMatriz, monitor->indiceUltimo);
-		/*if (true){
-			printf("\n DISCO %d",monitor->idMonitor);
-			printf("\n RP1 %lf ",resultadoParcial[0]);
-			printf("\n RP2 %lf ",resultadoParcial[1]);
-			printf("\n RP3 %lf ",resultadoParcial[2]);
-			printf("\n RP4 %lf ",resultadoParcial[3]);
-		}*/
 		for (int i = 0; i < 4; i++){
 			monitor->resultadoTotalDiscos[monitor->idMonitor-1][i] += resultadoParcial[i];
 		}
 		//Vaciar submatriz y reestablecer los datos del monitor
-		/*for (int i = 0; i < buffer; i++){
-			//free(monitor->subMatriz[i]);
-		}*/
-		//free(monitor->subMatriz);
 		monitor->indiceUltimo = 0;
 		monitor->full=2;
 		//Liberar la hebra
@@ -100,7 +111,6 @@ void * calculador(void * monitorVoid){
 		pthread_mutex_unlock(&monitor->mutex);
 	}
 	pthread_exit(NULL);
-
 }
 
 void asignarDataMonitores(){
@@ -118,7 +128,6 @@ void asignarDataMonitores(){
 	for(int i=0; i<largo;i++){
 		archivoGuardado[i]=(double*)calloc(sizeof(double),5);
 	}
-	
 	double posU, posV,posR,posI,posRU;
 	archivoEntrada=fopen(archivoVisibilidades,"r");
 	for(int i=0; i<largo;i++){
@@ -135,16 +144,11 @@ void asignarDataMonitores(){
 
 		fscanf(archivoEntrada, "%lf", &posRU);
 		c=fgetc(archivoEntrada);
-		
 		//Productor calcula propiedades del consumidor y consumidor es el que procesa
 		//Distribucion y como identificar cuando un punto va a un monitor
-		
 		//Obtenemos su distancia del centro}
 		double sumPot = pow(posU,2) + pow(posV,2);
-
-		//printf("\n %lf,%lf ",posU,posV);
 		double dist = sqrt(sumPot);
-		//printf("\n %lf ------Dist",dist);
 		//calculamos en que disco queda asignada (indice del monitor en el arreglo)
 		int indiceDiscAsignado = -1;
 		for (int j = 0; j < cantDiscos; ++j){
@@ -155,10 +159,7 @@ void asignarDataMonitores(){
 		if (indiceDiscAsignado == -1){
 			indiceDiscAsignado = cantDiscos -1;
 		}
-
-		//printf("\n %d ------------------------------    INDICE",indiceDiscAsignado);
 		//con este for identificamos el monitor que debemos usar
-		
 		if(listaMonitores[indiceDiscAsignado].indiceUltimo < buffer){
 			int indice=listaMonitores[indiceDiscAsignado].indiceUltimo;
 			listaMonitores[indiceDiscAsignado].subMatriz[indice][0]= posU;
@@ -168,9 +169,7 @@ void asignarDataMonitores(){
 			listaMonitores[indiceDiscAsignado].subMatriz[indice][4]= posRU;
 			listaMonitores[indiceDiscAsignado].indiceUltimo = indice+1;
 			listaMonitores[indiceDiscAsignado].lineasLeidas+=1;
-			//printf("\n %d ------------------------------    INDICE",listaMonitores[indiceDiscAsignado].indiceUltimo);
 		}
-		
 		// se termina la produccion
 		if(listaMonitores[indiceDiscAsignado].indiceUltimo == buffer){//el buffer queda lleno
 			//bloqueamos el mutex del monitor
@@ -184,8 +183,6 @@ void asignarDataMonitores(){
 			//pthread_cond_signal(&listaMonitores[indiceDiscAsignado].notEmpty);
 			pthread_mutex_unlock(&listaMonitores[indiceDiscAsignado].mutex);
 		}
-		//printf("\n %d ------------------------------    Final",listaMonitores[indiceDiscAsignado].indiceUltimo);
-		//printf("\n %d ------------------------------    Final",i);
 	}
 	terminoLectura = 1;
 	for(int i=0;i<cantDiscos;i++){
@@ -202,12 +199,14 @@ void asignarDataMonitores(){
 		Ecomun.resultadoTotalDiscos[i][1]= listaMonitores[i].resultadoTotalDiscos[i][1]/listaMonitores[i].lineasLeidas;//media imaginaria
 		Ecomun.resultadoTotalDiscos[i][2]= listaMonitores[i].resultadoTotalDiscos[i][2];//potencia par
 		Ecomun.resultadoTotalDiscos[i][3]= listaMonitores[i].resultadoTotalDiscos[i][3];//ruido
-		
 	}
 	fclose(archivoEntrada);
-	
 }
-
+/* FUNCION : 
+ENTRADA:
+SALIDA :
+OBS    :
+*/
 void crearMonitores(){
     //crear monitor
     listaMonitores = (Monitor*)calloc(sizeof(Monitor),cantDiscos);
@@ -237,8 +236,11 @@ void crearMonitores(){
 		}
 	}	
 }
-
-
+/* FUNCION : 
+ENTRADA:
+SALIDA :
+OBS    :
+*/
 void iniciarEstructuraComun(){
 	Ecomun.resultadoTotalDiscos = (double**)calloc(sizeof(double*),cantDiscos);
     for (int i = 0; i < cantDiscos; i++){
@@ -249,14 +251,3 @@ void iniciarEstructuraComun(){
     }
     
 }
-
-
-//Imprimir matriz Prueba
-	/*for(int i=0;i<largo;i++){
-        for(int j=0;j<5;j++){
-            printf("%lf",archivoGuardado[i][j]);
-            printf(" ");
-        }
-        printf("\n");
-    }*/ 
-//FUNCIONES-------------------------------------------------------------------------------------------------------------------------
