@@ -15,10 +15,9 @@
 3 i
 4 w */
 
-/* FUNCION : 
-ENTRADA:
-SALIDA :
-OBS    :
+/* FUNCION : escribe en el archivo de salida los resultados obtenidos con la ejecucion del programa
+ENTRADA: recibe el nombre del archivo final y lista de monitores
+SALIDA : void
 */
 void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int mediaImag, int potencia, int ruidoTotal){
     FILE* fileFinal = fopen(archivoFinal, "a");
@@ -28,10 +27,9 @@ void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int me
     fprintf(fileFinal,"Potencia: %d",potencia);
     fprintf(fileFinal,"Ruido total %d:",ruidoTotal);
 }
-/* FUNCION : 
-ENTRADA:
-SALIDA :
-OBS    :
+/* FUNCION : calcula la pontencia parcial de un disco
+ENTRADA: recibe la matriz que contiene los datos del disco  y el largo
+SALIDA : retorna la potencia parcial en formato double
 */
 double calculoPotenciaParcial(double ** matriz, int largo){
     double potenciaParcial = 0;
@@ -40,10 +38,9 @@ double calculoPotenciaParcial(double ** matriz, int largo){
     }
     return potenciaParcial;
 }
-/* FUNCION : 
-ENTRADA:
-SALIDA :
-OBS    :
+/* FUNCION : calcula el ruido total parcial de cada disco
+ENTRADA: recibe la matriz que contiene los datos del disco y largo
+SALIDA : retorna ruido total parcial en formato double
 */
 double calculoRuidoTotalParcial(double ** matriz, int largo){
     double ruidoTotalParcial = 0;
@@ -52,10 +49,9 @@ double calculoRuidoTotalParcial(double ** matriz, int largo){
     }
     return ruidoTotalParcial;
 }
-/* FUNCION : 
-ENTRADA:
-SALIDA :
-OBS    :
+/* FUNCION : calcula la suma correspondiente a los vectores reales, no los divide debido a que esto se hace al final
+ENTRADA: recibe la matriz que contiene los datos del disco y largo
+SALIDA : retorna la suma de la media real en formato double
 */
 double calculoSumaMediaReal(double ** matriz, int largo){
     double sumaReal=0.0;
@@ -64,10 +60,9 @@ double calculoSumaMediaReal(double ** matriz, int largo){
     }
     return sumaReal;
 }
-/* FUNCION : 
-ENTRADA:
-SALIDA :
-OBS    :
+/* FUNCION : calcula la suma correspondiendo a los vectoes imaginarios, no los divide debido a que esto se hace al final
+ENTRADA: recibe la matriz que contiene los datos del disco y largo
+SALIDA : retorna la suma de la media real en formato double
 */
 double calculoSumaMediaImaginaria(double ** matriz, int largo){
     double sumaImaginaria =0.0;
@@ -76,10 +71,10 @@ double calculoSumaMediaImaginaria(double ** matriz, int largo){
     }
     return sumaImaginaria;
 }
-/* FUNCION : 
-ENTRADA:
-SALIDA :
-OBS    : Calculador reune las funciones.h y las ejecuta 
+/* FUNCION : funcion que calcula en los discos los resultados parciales, esta es ejecutada por las hebras. (Consumidor)
+ENTRADA: recibe el monitor correspondiente en formato void*
+SALIDA : void
+OBS    :  a pesar de no retornar parametros, la funcion modifica variables globales 
 */
 void * calculador(void * monitorVoid){
 	Monitor * monitor = (Monitor *)monitorVoid;

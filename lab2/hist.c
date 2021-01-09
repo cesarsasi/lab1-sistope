@@ -207,7 +207,7 @@ int main(int argc, char** argv){
   }
   return 0;
 }
-
+z
 /*
 FUNCION : Crear hebras de subcuadrantes y esperar el termino de su ejecucion (recursivo)
 ademas implementa el calculo de histograma para cada cuadrante. 
