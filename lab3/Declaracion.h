@@ -1,8 +1,15 @@
+/*
+Laboratorio 3
+Profesor   : Fernando Rannou
+Ayudante   : Benjamin Muñoz
+Integrantes:
+-                Octavio Nicolas Canales Ñirriman 20.003.610-7
+-                César Antonio Salazar Silva      19.916.471-6
+Sistemas Operativos 2.2020  (Creación: 26 de Diciembre del 2020)
+*/
 #ifndef Declaracion_h_
 #define Declaracion_h_
-//Declaracion de estructuras a utilizar
-//DECLARACION-------------------------------------------------------------------------------------------------------------------------
-//Declaracion de estructuras a utilizar
+// ESTRUCTURA que simula monitor, contiene los parametros que permiten el manejo corrector del traspaso de informacion entre hebras
 typedef struct monitor{
 	double **subMatriz;
 	double ** resultadoTotalDiscos;
@@ -15,6 +22,7 @@ typedef struct monitor{
 	pthread_cond_t notFull, notEmpty;
 } Monitor;
 
+//ESTRUCTURA que almacena los resultados finales de los diascos, segun el manejo de cada monitor.
 typedef struct comun{
 	double ** resultadoTotalDiscos; //Estructura del arreglo [rD1,rD2,.....n] -> (rD1 = [mR,mI,P,R])
 }Comun;
@@ -27,7 +35,6 @@ char *mflag, *archivoVisibilidades, *archivoSalida;
 int d,cantDiscos,buffer,anchoDiscos,flag;
 int terminoLectura;
 
-
 //Declaracion de funciones a utilizar en el laboratorio
 void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int mediaImag, int potencia, int ruidoTotal);
 double calculoPotenciaParcial(double ** matriz, int largo);
@@ -38,5 +45,4 @@ void *calculador(void * monitorVoid);
 void asignarDataMonitores();
 void crearMonitores();
 void iniciarEstructuraComun();
-//DECLARACION-------------------------------------------------------------------------------------------------------------------------
 #endif

@@ -1,3 +1,12 @@
+/*
+Laboratorio 3
+Profesor   : Fernando Rannou
+Ayudante   : Benjamin Muñoz
+Integrantes:
+-                Octavio Nicolas Canales Ñirriman 20.003.610-7
+-                César Antonio Salazar Silva      19.916.471-6
+Sistemas Operativos 2.2020  (Creación: 26 de Diciembre del 2020)
+*/
 #include<stdio.h>
 #include<stdlib.h>
 #include<stdint.h>
