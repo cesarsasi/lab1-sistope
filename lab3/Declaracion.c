@@ -132,6 +132,7 @@ void asignarDataMonitores(){
 			largo++;
 		}
 	}
+	
 	fclose(archivoEntrada);
 	printf("\n largo archivo %d \n", largo);
 	double **archivoGuardado = (double **)calloc(sizeof(double*), largo);
@@ -140,7 +141,7 @@ void asignarDataMonitores(){
 	}
 	double posU, posV,posR,posI,posRU;
 	archivoEntrada=fopen(archivoVisibilidades,"r");
-	for(int i=0; i<largo;i++){
+	for(int i=0; i<=largo;i++){
 		fscanf(archivoEntrada, "%lf", &posU);
 		c=fgetc(archivoEntrada);
 		fscanf(archivoEntrada, "%lf", &posV);
