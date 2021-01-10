@@ -36,7 +36,7 @@ int d,cantDiscos,buffer,anchoDiscos,flag;
 int terminoLectura;
 
 //Declaracion de funciones a utilizar en el laboratorio
-void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int mediaImag, int potencia, int ruidoTotal);
+void escrituraResultados();
 double calculoPotenciaParcial(double ** matriz, int largo);
 double calculoRuidoTotalParcial(double ** matriz, int largo);
 double calculoSumaMediaReal(double ** matriz, int largo);

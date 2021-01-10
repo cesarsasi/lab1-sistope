@@ -28,13 +28,15 @@ Sistemas Operativos 2.2020  (Creación: 26 de Diciembre del 2020)
 ENTRADA: recibe el nombre del archivo final y lista de monitores
 SALIDA : void
 */
-void escrituraResultados(char * archivoFinal, int idDisco, int mediaReal, int mediaImag, int potencia, int ruidoTotal){
-    FILE* fileFinal = fopen(archivoFinal, "a");
-    fprintf(fileFinal,"Disco: %d",idDisco);
-    fprintf(fileFinal,"Media real: %d",mediaReal);
-    fprintf(fileFinal,"Media imaginaria: %d",mediaImag);
-    fprintf(fileFinal,"Potencia: %d",potencia);
-    fprintf(fileFinal,"Ruido total %d:",ruidoTotal);
+void escrituraResultados(){
+    FILE* fileFinal = fopen(archivoSalida, "a");
+	for(int i=0;i<cantDiscos;i++){
+		fprintf(fileFinal,"Disco: %d\n",i+1);
+		fprintf(fileFinal,"Media real: %lf\n",Ecomun.resultadoTotalDiscos[i][0]);
+		fprintf(fileFinal,"Media imaginaria: %lf\n",Ecomun.resultadoTotalDiscos[i][1]);
+		fprintf(fileFinal,"Potencia: %lf\n",Ecomun.resultadoTotalDiscos[i][2]);
+		fprintf(fileFinal,"Ruido total %lf:\n",Ecomun.resultadoTotalDiscos[i][3]);
+	}
 }
 /* FUNCION : calcula la pontencia parcial de un disco
 ENTRADA: recibe la matriz que contiene los datos del disco  y el largo
@@ -209,6 +211,7 @@ void asignarDataMonitores(){
 		Ecomun.resultadoTotalDiscos[i][3]= listaMonitores[i].resultadoTotalDiscos[i][3];//ruido
 	}
 	fclose(archivoEntrada);
+	escrituraResultados();
 }
 /* FUNCION : Inicializa la estructura monitor, asigna memoria a las variables correspondientes de cada uno y los settea en cero.
 ENTRADA: Ninguna, maneja puntero tipo Monitor que es variable global

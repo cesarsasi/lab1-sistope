@@ -126,7 +126,7 @@ int main(int argc, char** argv){
     }
     if (flag == 1){
         for(int i=0;i<cantDiscos;i++){
-            printf("\nLineas leidas por el disco %d --> %lf\n",listaMonitores[i].idMonitor,listaMonitores[i].lineasLeidas);
+            printf("\nLineas leidas por el disco %d --> %d\n",listaMonitores[i].idMonitor,(int)listaMonitores[i].lineasLeidas);
         }
     }
 	return 0;
